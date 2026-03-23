@@ -716,6 +716,7 @@ async function sendMessage() {
       })
     });
     const data = await res.json();
+    console.log('Gemini response:', JSON.stringify(data).slice(0, 300));
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Desculpe, não consegui processar.';
     typing.remove();
     conversationHistory.push({ role: 'assistant', content: reply });

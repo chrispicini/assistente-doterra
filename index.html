@@ -3,183 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consultora doTERRA IA</title>
+<title>doTERRA IA — Consultora</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --cream: #FAF7F2;
-    --green-deep: #2D4A3E;
-    --green-mid: #4A7A65;
-    --green-light: #8AB5A0;
-    --green-pale: #E8F2EE;
-    --amber: #C8874A;
-    --amber-pale: #FDF0E4;
-    --text-dark: #1A2E26;
-    --text-mid: #4A6358;
-    --text-light: #8FAF9F;
-    --border: #D8EAE2;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(138,181,160,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 90% 100%, rgba(200,135,74,0.08) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .app {
-    width: 100%;
-    max-width: 680px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 1;
-  }
-  header {
-    border-bottom: 1px solid var(--border);
-    background: rgba(250,247,242,0.96);
-    backdrop-filter: blur(12px);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .header-logo-bar {
-    padding: 14px 24px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
-  .header-logo-bar img { height: 30px; object-fit: contain; }
-  .header-tagline { font-size: 11px; color: var(--text-light); font-weight: 300; }
-  .status-dot {
-    width: 7px; height: 7px; background: #5BC98A; border-radius: 50%;
-    box-shadow: 0 0 0 3px rgba(91,201,138,0.2);
-    animation: pulse 2.5s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 3px rgba(91,201,138,0.2); }
-    50% { box-shadow: 0 0 0 6px rgba(91,201,138,0.1); }
-  }
-  /* PROFILE SELECTOR */
-  .profile-bar {
-    padding: 10px 16px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .profile-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .profile-label { font-size: 12px; font-weight: 500; color: var(--text-mid); min-width: 42px; flex-shrink: 0; }
-  .profile-options { display: flex; gap: 6px; flex-wrap: wrap; }
-  .profile-btn {
-    padding: 5px 14px; border-radius: 20px;
-    border: 1.5px solid var(--border);
-    background: white; font-family: 'DM Sans', sans-serif;
-    font-size: 12px; color: var(--text-mid);
-    cursor: pointer; transition: all 0.18s; white-space: nowrap;
-  }
-  .profile-btn:hover { border-color: var(--green-light); color: var(--green-deep); }
-  .profile-btn.active { background: var(--green-deep); border-color: var(--green-deep); color: white; font-weight: 500; }
-  .profile-hint { font-size: 11px; color: var(--text-light); padding: 0 2px; }
-  .messages {
-    flex: 1; overflow-y: auto; padding: 24px 20px;
-    display: flex; flex-direction: column; gap: 20px;
-    scroll-behavior: smooth;
-  }
-  .messages::-webkit-scrollbar { width: 4px; }
-  .messages::-webkit-scrollbar-track { background: transparent; }
-  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .welcome-card {
-    background: var(--green-deep); border-radius: 20px; padding: 28px 24px;
-    color: white; position: relative; overflow: hidden;
-  }
-  .welcome-card::after {
-    content: ''; position: absolute; right: -20px; top: -20px;
-    width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;
-  }
-  .welcome-card h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; }
-  .welcome-card p { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.7; font-weight: 300; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-  .chip {
-    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.9); border-radius: 20px; padding: 6px 14px;
-    font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-  }
-  .chip:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
-  .msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.3s ease forwards; opacity: 0; }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .msg.user { flex-direction: row-reverse; }
-  .avatar { width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
-  .avatar.ai { background: var(--green-deep); color: white; }
-  .avatar.user-av { background: var(--amber-pale); color: var(--amber); font-size: 12px; }
-  .bubble { max-width: 82%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.65; color: var(--text-dark); }
-  .msg.ai .bubble { background: white; border: 1px solid var(--border); border-top-left-radius: 4px; }
-  .msg.user .bubble { background: var(--green-deep); color: white; border-top-right-radius: 4px; }
-  .bubble strong { font-weight: 500; color: var(--green-deep); }
-  .msg.user .bubble strong { color: var(--green-pale); }
-  .bubble .section-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; color: var(--green-mid); margin: 10px 0 4px; display: block; }
-  .bubble ul { padding-left: 16px; margin: 6px 0; }
-  .bubble ul li { margin: 3px 0; font-size: 13.5px; }
-  .bubble .warning { background: #FEF3E2; border-left: 3px solid var(--amber); border-radius: 4px; padding: 8px 12px; margin-top: 10px; font-size: 13px; color: #7A4A1A; line-height: 1.5; }
-  .typing { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.3s ease forwards; opacity: 0; }
-  .typing-bubble { background: white; border: 1px solid var(--border); border-radius: 18px; border-top-left-radius: 4px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
-  .dot { width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
-  .dot:nth-child(2) { animation-delay: 0.2s; }
-  .dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,80%,100%{transform:scale(0.8);opacity:0.5;} 40%{transform:scale(1.2);opacity:1;} }
-  .input-area { padding: 16px 20px 24px; background: rgba(250,247,242,0.95); backdrop-filter: blur(12px); border-top: 1px solid var(--border); }
-  .disclaimer { font-size: 11px; color: var(--text-light); text-align: center; margin-bottom: 12px; line-height: 1.5; }
-  .input-row { display: flex; gap: 10px; align-items: flex-end; }
-  textarea { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 16px; padding: 12px 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); resize: none; min-height: 48px; max-height: 120px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto; }
-  textarea::placeholder { color: var(--text-light); }
-  textarea:focus { outline: none; border-color: var(--green-light); }
-  .send-btn { width: 48px; height: 48px; background: var(--green-deep); border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
-  .send-btn:hover { background: var(--green-mid); transform: scale(1.05); }
-  .send-btn:active { transform: scale(0.97); }
-  .send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
-  .send-btn svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  @media (max-width: 480px) { .bubble { max-width: 88%; } .welcome-card h2 { font-size: 19px; } }
+:root {
+  --cream: #FAF7F2;
+  --green-deep: #2D4A3E;
+  --green-mid: #4A7A65;
+  --green-light: #8AB5A0;
+  --green-pale: #E8F2EE;
+  --amber: #C8874A;
+  --amber-pale: #FDF0E4;
+  --text-dark: #1A2E26;
+  --text-mid: #4A6358;
+  --text-light: #8FAF9F;
+  --border: #D8EAE2;
+  --danger: #E24B4A;
+  --danger-pale: #FCEBEB;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--cream); min-height:100vh; }
+body::before { content:''; position:fixed; inset:0; background-image: radial-gradient(ellipse 80% 60% at 10% 0%,rgba(138,181,160,.15) 0%,transparent 60%), radial-gradient(ellipse 60% 80% at 90% 100%,rgba(200,135,74,.08) 0%,transparent 60%); pointer-events:none; z-index:0; }
+
+/* ── UTILS ── */
+.hidden { display:none !important; }
+input,textarea,select { font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text-dark); width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; background:white; transition:border-color .2s; outline:none; }
+input:focus,textarea:focus,select:focus { border-color:var(--green-light); }
+label { font-size:12px; font-weight:500; color:var(--text-mid); display:block; margin-bottom:4px; }
+.field { margin-bottom:14px; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:11px 20px; border-radius:10px; border:none; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; text-decoration:none; }
+.btn-primary { background:var(--green-deep); color:white; }
+.btn-primary:hover { background:var(--green-mid); }
+.btn-secondary { background:white; color:var(--green-deep); border:1.5px solid var(--border); }
+.btn-secondary:hover { border-color:var(--green-light); background:var(--green-pale); }
+.btn-danger { background:var(--danger-pale); color:var(--danger); border:1.5px solid #F7C1C1; }
+.btn-danger:hover { background:#F7C1C1; }
+.btn-sm { padding:7px 14px; font-size:12px; border-radius:8px; }
+.btn-full { width:100%; }
+.btn:disabled { opacity:.5; cursor:default; }
+.card { background:white; border:1px solid var(--border); border-radius:14px; padding:20px; }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--green-deep); color:white; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:500; z-index:9999; animation:fadeUp .3s ease; box-shadow:0 4px 20px rgba(0,0,0,.15); }
+.toast.error { background:var(--danger); }
+@keyframes fadeUp { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:500; }
+.badge-green { background:var(--green-pale); color:var(--green-deep); }
+.badge-amber { background:var(--amber-pale); color:#7A4A1A; }
+.section-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--green-deep); margin-bottom:16px; }
+.divider { height:1px; background:var(--border); margin:16px 0; }
+
+/* ── AUTH ── */
+#auth-screen { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--cream); }
+.auth-box { width:100%; max-width:400px; }
+.auth-logo { text-align:center; margin-bottom:28px; }
+.auth-logo img { height:36px; }
+.auth-logo p { font-size:12px; color:var(--text-light); margin-top:6px; }
+.auth-card { background:white; border:1px solid var(--border); border-radius:16px; padding:28px 24px; }
+.auth-card h2 { font-family:'Playfair Display',serif; font-size:20px; font-weight:600; color:var(--green-deep); margin-bottom:4px; }
+.auth-card p { font-size:13px; color:var(--text-light); margin-bottom:20px; }
+.auth-toggle { text-align:center; margin-top:16px; font-size:13px; color:var(--text-mid); }
+.auth-toggle a { color:var(--green-deep); font-weight:500; cursor:pointer; text-decoration:none; }
+.auth-disclaimer { font-size:11px; color:var(--text-light); text-align:center; margin-top:16px; line-height:1.5; }
+
+/* ── APP SHELL ── */
+#app { display:none; flex-direction:column; min-height:100vh; max-width:700px; margin:0 auto; position:relative; z-index:1; }
+
+/* ── TOP BAR ── */
+.topbar { background:rgba(250,247,242,.96); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
+.topbar-logo { padding:12px 16px 10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+.topbar-logo img { height:28px; }
+.topbar-logo-fallback { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--green-deep); }
+.topbar-right { display:flex; align-items:center; gap:10px; }
+.status-dot { width:7px; height:7px; background:#5BC98A; border-radius:50%; box-shadow:0 0 0 3px rgba(91,201,138,.2); animation:pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 3px rgba(91,201,138,.2)} 50%{box-shadow:0 0 0 6px rgba(91,201,138,.1)} }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:700px; background:rgba(250,247,242,.96); backdrop-filter:blur(12px); border-top:1px solid var(--border); display:flex; z-index:50; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 14px; cursor:pointer; gap:4px; transition:color .18s; color:var(--text-light); border:none; background:none; font-family:'DM Sans',sans-serif; }
+.nav-item.active { color:var(--green-deep); }
+.nav-item svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.nav-label { font-size:10px; font-weight:500; }
+
+/* ── CONTENT ── */
+.content { flex:1; padding:20px 16px 90px; }
+
+/* ── PACIENTE SELECTOR ── */
+.patient-bar { padding:10px 16px 12px; display:flex; flex-direction:column; gap:8px; }
+.patient-select-row { display:flex; gap:8px; align-items:center; }
+.patient-select-row select { flex:1; }
+.profile-row { display:flex; gap:8px; flex-wrap:wrap; }
+.profile-label { font-size:12px; font-weight:500; color:var(--text-mid); min-width:42px; flex-shrink:0; display:flex; align-items:center; }
+.profile-options { display:flex; gap:6px; flex-wrap:wrap; }
+.profile-btn { padding:5px 14px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--text-mid); cursor:pointer; transition:all .18s; white-space:nowrap; }
+.profile-btn:hover { border-color:var(--green-light); color:var(--green-deep); }
+.profile-btn.active { background:var(--green-deep); border-color:var(--green-deep); color:white; font-weight:500; }
+.profile-hint { font-size:11px; color:var(--text-light); padding:0 2px; }
+
+/* ── CHAT ── */
+.messages { display:flex; flex-direction:column; gap:16px; padding-bottom:8px; }
+.msg { display:flex; gap:10px; align-items:flex-start; animation:fadeUp .3s ease forwards; opacity:0; }
+.msg.user { flex-direction:row-reverse; }
+.avatar { width:30px; height:30px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; }
+.avatar.ai { background:var(--green-deep); color:white; }
+.avatar.user-av { background:var(--amber-pale); color:var(--amber); font-size:11px; }
+.bubble { max-width:82%; padding:12px 16px; border-radius:16px; font-size:14px; line-height:1.65; color:var(--text-dark); }
+.msg.ai .bubble { background:white; border:1px solid var(--border); border-top-left-radius:4px; }
+.msg.user .bubble { background:var(--green-deep); color:white; border-top-right-radius:4px; }
+.bubble strong { font-weight:500; color:var(--green-deep); }
+.msg.user .bubble strong { color:var(--green-pale); }
+.bubble ul { padding-left:16px; margin:6px 0; }
+.bubble ul li { margin:3px 0; font-size:13.5px; }
+.bubble .warning { background:#FEF3E2; border-left:3px solid var(--amber); border-radius:4px; padding:8px 12px; margin-top:10px; font-size:13px; color:#7A4A1A; line-height:1.5; }
+.typing { display:flex; gap:10px; align-items:flex-start; }
+.typing-bubble { background:white; border:1px solid var(--border); border-radius:16px; border-top-left-radius:4px; padding:14px 18px; display:flex; gap:5px; align-items:center; }
+.dot { width:6px; height:6px; background:var(--green-light); border-radius:50%; animation:bounce 1.2s ease-in-out infinite; }
+.dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1.2);opacity:1}}
+.chat-input-area { position:fixed; bottom:60px; left:50%; transform:translateX(-50%); width:100%; max-width:700px; padding:10px 16px 12px; background:rgba(250,247,242,.96); backdrop-filter:blur(12px); border-top:1px solid var(--border); z-index:40; }
+.chat-disclaimer { font-size:11px; color:var(--text-light); text-align:center; margin-bottom:8px; }
+.chat-row { display:flex; gap:8px; align-items:flex-end; }
+.chat-row textarea { flex:1; min-height:44px; max-height:100px; resize:none; border-radius:14px; overflow-y:auto; }
+.send-btn { width:44px; height:44px; background:var(--green-deep); border:none; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+.send-btn:hover { background:var(--green-mid); transform:scale(1.05); }
+.send-btn:disabled { opacity:.4; cursor:default; transform:none; }
+.send-btn svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.save-bar { display:flex; justify-content:flex-end; padding:6px 0 0; }
+.chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+.chip { background:rgba(45,74,62,.08); border:1px solid rgba(45,74,62,.15); color:var(--green-deep); border-radius:20px; padding:5px 13px; font-size:12px; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; }
+.chip:hover { background:var(--green-pale); }
+
+/* ── PACIENTES LIST ── */
+.search-bar { margin-bottom:14px; }
+.patient-card { background:white; border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:all .18s; }
+.patient-card:hover { border-color:var(--green-light); box-shadow:0 2px 8px rgba(45,74,62,.08); }
+.patient-card-top { display:flex; align-items:center; justify-content:space-between; }
+.patient-name { font-size:15px; font-weight:500; color:var(--text-dark); }
+.patient-info { font-size:12px; color:var(--text-light); margin-top:3px; }
+.patient-actions { display:flex; gap:6px; margin-top:10px; }
+.whatsapp-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; background:#25D366; color:white; border-radius:8px; font-size:12px; font-weight:500; text-decoration:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.empty-state { text-align:center; padding:48px 20px; color:var(--text-light); }
+.empty-state svg { width:48px; height:48px; stroke:var(--border); fill:none; stroke-width:1.5; margin-bottom:12px; }
+.empty-state p { font-size:14px; }
+
+/* ── FORM MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+.modal { background:white; border-radius:20px 20px 0 0; padding:24px 20px 36px; width:100%; max-width:700px; max-height:90vh; overflow-y:auto; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.modal-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--green-deep); }
+.modal-close { width:32px; height:32px; border-radius:50%; background:var(--green-pale); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--green-deep); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ── FINANCEIRO ── */
+.fin-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.fin-card { background:white; border:1px solid var(--border); border-radius:12px; padding:14px; }
+.fin-label { font-size:11px; color:var(--text-light); text-transform:uppercase; letter-spacing:.4px; }
+.fin-value { font-size:22px; font-weight:600; color:var(--green-deep); margin-top:4px; }
+.fin-sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+.fin-value.amber { color:var(--amber); }
+.venda-row { background:white; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.venda-info { flex:1; }
+.venda-produto { font-size:13.5px; font-weight:500; color:var(--text-dark); }
+.venda-detalhe { font-size:12px; color:var(--text-light); margin-top:2px; }
+.venda-lucro { font-size:14px; font-weight:600; color:var(--green-deep); }
+.month-filter { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
+.month-btn { padding:6px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-size:12px; font-weight:500; color:var(--text-mid); cursor:pointer; white-space:nowrap; transition:all .18s; }
+.month-btn.active { background:var(--green-deep); border-color:var(--green-deep); color:white; }
+
+/* ── CONTA ── */
+.profile-section { margin-bottom:20px; }
+.profile-avatar { width:64px; height:64px; border-radius:16px; background:var(--green-deep); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:24px; color:white; margin-bottom:12px; }
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <!-- Logo bar -->
-    <div class="header-logo-bar">
-      <img src="https://www.doterra.com/_ui/desktop/common/images/wqa/doTERRA Essential Oil.svg" alt="doTERRA" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'"/>
-      <span id="logo-fallback" style="display:none;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--green-deep);">dōTERRA</span>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button onclick="novaConsulta()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--green-deep);cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='white'">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          Nova consulta
-        </button>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <img src="https://www.doterra.com/_ui/desktop/common/images/wqa/doTERRA Essential Oil.svg" alt="doTERRA" onerror="this.style.display='none';document.getElementById('auth-logo-fallback').style.display='block'">
+      <div id="auth-logo-fallback" style="display:none;font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--green-deep);">dōTERRA</div>
+      <p>Assistente IA · Gestão de Consultora</p>
+    </div>
+    <div class="auth-card" id="login-card">
+      <h2>Bem-vinda de volta 🌿</h2>
+      <p>Entre com sua conta para acessar</p>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
+      <div class="auth-toggle">Não tem conta? <a onclick="toggleAuth('register')">Cadastre-se</a></div>
+    </div>
+    <div class="auth-card hidden" id="register-card">
+      <h2>Criar conta 🌿</h2>
+      <p>Preencha seus dados para começar</p>
+      <div class="field"><label>Nome completo</label><input type="text" id="reg-nome" placeholder="Seu nome"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"></div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">Criar conta</button>
+      <div class="auth-toggle">Já tem conta? <a onclick="toggleAuth('login')">Entrar</a></div>
+    </div>
+    <p class="auth-disclaimer">Ferramenta profissional para consultoras doTERRA.<br>Não substitui diagnóstico médico.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="https://www.doterra.com/_ui/desktop/common/images/wqa/doTERRA Essential Oil.svg" alt="doTERRA" style="height:28px" onerror="this.style.display='none';document.getElementById('app-logo-fallback').style.display='block'">
+      <div id="app-logo-fallback" style="display:none" class="topbar-logo-fallback">dōTERRA</div>
+      <div class="topbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="novaConsulta()">↺ Nova consulta</button>
         <div class="status-dot"></div>
       </div>
     </div>
-    <!-- Profile selector -->
-    <div class="profile-bar">
+    <!-- Patient bar (only on chat) -->
+    <div class="patient-bar" id="patient-bar">
+      <div class="patient-select-row">
+        <select id="patient-select" onchange="onPatientSelect()">
+          <option value="">— Selecionar paciente —</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('patient-modal')">+ Novo</button>
+      </div>
       <div class="profile-row">
         <span class="profile-label">Sexo</span>
-        <div class="profile-options" id="sex-options">
+        <div class="profile-options">
           <button class="profile-btn" onclick="selectProfile('sex','Feminino',this)">♀ Feminino</button>
           <button class="profile-btn" onclick="selectProfile('sex','Masculino',this)">♂ Masculino</button>
         </div>
       </div>
       <div class="profile-row">
         <span class="profile-label">Idade</span>
-        <div class="profile-options" id="age-options">
+        <div class="profile-options">
           <button class="profile-btn" onclick="selectProfile('age','criança (abaixo de 12 anos)',this)">0–12</button>
           <button class="profile-btn" onclick="selectProfile('age','adolescente (12–18 anos)',this)">12–18</button>
           <button class="profile-btn" onclick="selectProfile('age','adulto (18–40 anos)',this)">18–40</button>
@@ -188,70 +243,177 @@
       </div>
       <span class="profile-hint" id="profile-hint">Selecione o perfil do cliente para respostas mais precisas</span>
     </div>
-  </header>
+  </div>
 
-  <div class="messages" id="messages">
-    <div class="welcome-card">
-      <h2>Olá! Sou sua assistente de óleos essenciais 🌿</h2>
-      <p>Descreva o sintoma, a situação ou o perfil do cliente e eu indico o óleo ideal, como usar, diluição correta, cuidados importantes e combinações que potencializam o resultado.</p>
-      <div class="chips">
-        <button class="chip" onclick="sendChip('Cliente adulta com dor de cabeça forte, não grávida')">Dor de cabeça</button>
-        <button class="chip" onclick="sendChip('Criança de 5 anos com tosse e congestão nasal')">Tosse em criança</button>
-        <button class="chip" onclick="sendChip('Adulto com insônia e ansiedade, quer relaxar')">Insônia / Ansiedade</button>
-        <button class="chip" onclick="sendChip('Cliente com dor muscular após treino')">Dor muscular</button>
-        <button class="chip" onclick="sendChip('Quero um blend para difusor que dê energia e foco')">Foco e energia</button>
-        <button class="chip" onclick="sendChip('Mulher com TPM, cólica e irritabilidade')">TPM e cólica</button>
-        <button class="chip" onclick="sendChip('Cliente idoso com articulações doendo e dificuldade para dormir')">Cliente idoso</button>
-        <button class="chip" onclick="sendChip('Gestante de 2º trimestre com náusea e ansiedade')">Gestante</button>
+  <!-- PAGES -->
+  <div class="content" id="page-chat">
+    <div class="messages" id="messages"></div>
+  </div>
+
+  <div class="content hidden" id="page-pacientes">
+    <div class="section-title">Meus Pacientes</div>
+    <div class="search-bar"><input type="text" id="search-pacientes" placeholder="Buscar paciente..." oninput="renderPacientes()"></div>
+    <div id="pacientes-list"></div>
+  </div>
+
+  <div class="content hidden" id="page-financeiro">
+    <div class="section-title">Financeiro</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="month-filter" id="month-filter"></div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('venda-modal')">+ Venda</button>
+    </div>
+    <div class="fin-summary" id="fin-summary"></div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:13px;font-weight:500;color:var(--text-mid)">Vendas do período</span>
+      <button class="btn btn-secondary btn-sm" onclick="openModal('produto-modal')">+ Produto</button>
+    </div>
+    <div id="vendas-list"></div>
+  </div>
+
+  <div class="content hidden" id="page-conta">
+    <div class="section-title">Minha Conta</div>
+    <div class="card">
+      <div class="profile-avatar" id="conta-avatar">?</div>
+      <div style="font-size:16px;font-weight:500;color:var(--text-dark)" id="conta-nome">—</div>
+      <div style="font-size:13px;color:var(--text-light);margin-top:2px" id="conta-email">—</div>
+      <div class="divider"></div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:12px">Resumo geral</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div><div style="font-size:11px;color:var(--text-light)">Pacientes</div><div style="font-size:20px;font-weight:600;color:var(--green-deep)" id="conta-total-pacientes">0</div></div>
+        <div><div style="font-size:11px;color:var(--text-light)">Consultas</div><div style="font-size:20px;font-weight:600;color:var(--green-deep)" id="conta-total-consultas">0</div></div>
+        <div><div style="font-size:11px;color:var(--text-light)">Vendas</div><div style="font-size:20px;font-weight:600;color:var(--green-deep)" id="conta-total-vendas">0</div></div>
       </div>
+      <div class="divider"></div>
+      <button class="btn btn-danger btn-full" onclick="doLogout()">Sair da conta</button>
     </div>
   </div>
 
-  <div class="input-area">
-    <p class="disclaimer">Ferramenta de apoio profissional para consultoras doTERRA. Não substitui diagnóstico ou orientação médica.</p>
-    <div class="input-row">
-      <textarea id="input" placeholder="Descreva o sintoma, a situação ou o perfil do cliente..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+  <!-- CHAT INPUT -->
+  <div class="chat-input-area" id="chat-input-area">
+    <div class="chat-disclaimer">Ferramenta de apoio profissional. Não substitui diagnóstico médico.</div>
+    <div class="chat-row">
+      <textarea id="chat-input" placeholder="Descreva o sintoma ou situação do cliente..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
   </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-chat" onclick="showPage('chat')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-label">Consulta</span>
+    </button>
+    <button class="nav-item" id="nav-pacientes" onclick="showPage('pacientes')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label">Pacientes</span>
+    </button>
+    <button class="nav-item" id="nav-financeiro" onclick="showPage('financeiro')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="nav-label">Financeiro</span>
+    </button>
+    <button class="nav-item" id="nav-conta" onclick="showPage('conta')">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">Conta</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay hidden" id="patient-modal" onclick="closeModalOutside(event,'patient-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="patient-modal-title">Novo Paciente</span>
+      <button class="modal-close" onclick="closeModal('patient-modal')">×</button>
+    </div>
+    <input type="hidden" id="edit-paciente-id">
+    <div class="form-row">
+      <div class="field"><label>Nome completo *</label><input type="text" id="p-nome" placeholder="Nome do paciente"></div>
+      <div class="field"><label>Telefone</label><input type="tel" id="p-telefone" placeholder="(11) 99999-9999"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Sexo</label>
+        <select id="p-sexo"><option value="">Selecionar</option><option>Feminino</option><option>Masculino</option></select>
+      </div>
+      <div class="field"><label>Data de nascimento</label><input type="date" id="p-nascimento"></div>
+    </div>
+    <div class="field"><label>Condições de saúde</label><input type="text" id="p-condicoes" placeholder="Ex: diabetes, hipertensão, gestante..."></div>
+    <div class="field"><label>Medicamentos em uso</label><input type="text" id="p-medicamentos" placeholder="Ex: losartana, metformina..."></div>
+    <div class="field"><label>Alergias conhecidas</label><input type="text" id="p-alergias" placeholder="Ex: látex, penicilina..."></div>
+    <div class="field"><label>Observações</label><textarea id="p-obs" rows="2" placeholder="Outras informações relevantes..."></textarea></div>
+    <button class="btn btn-primary btn-full" onclick="savePaciente()">Salvar paciente</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="produto-modal" onclick="closeModalOutside(event,'produto-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Cadastrar Produto</span>
+      <button class="modal-close" onclick="closeModal('produto-modal')">×</button>
+    </div>
+    <div class="field"><label>Nome do produto *</label><input type="text" id="prod-nome" placeholder="Ex: Lavanda 15ml"></div>
+    <div class="form-row">
+      <div class="field"><label>Preço de custo (R$)</label><input type="number" id="prod-custo" placeholder="0,00" step="0.01"></div>
+      <div class="field"><label>Preço de venda (R$)</label><input type="number" id="prod-venda" placeholder="0,00" step="0.01"></div>
+    </div>
+    <div class="field"><label>Estoque disponível</label><input type="number" id="prod-estoque" placeholder="0" min="0"></div>
+    <button class="btn btn-primary btn-full" onclick="saveProduto()">Salvar produto</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="venda-modal" onclick="closeModalOutside(event,'venda-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Registrar Venda</span>
+      <button class="modal-close" onclick="closeModal('venda-modal')">×</button>
+    </div>
+    <div class="field"><label>Paciente</label>
+      <select id="v-paciente"><option value="">— Sem vínculo —</option></select>
+    </div>
+    <div class="field"><label>Produto *</label>
+      <select id="v-produto" onchange="onProdutoSelect()"><option value="">Selecionar produto</option></select>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Quantidade</label><input type="number" id="v-qtd" value="1" min="1" oninput="calcLucroVenda()"></div>
+      <div class="field"><label>Preço de venda (R$)</label><input type="number" id="v-preco" placeholder="0,00" step="0.01" oninput="calcLucroVenda()"></div>
+    </div>
+    <div class="field"><label>Data da venda</label><input type="date" id="v-data"></div>
+    <div id="lucro-preview" style="display:none;padding:10px 14px;background:var(--green-pale);border-radius:8px;font-size:13px;color:var(--green-deep);margin-bottom:14px;"></div>
+    <button class="btn btn-primary btn-full" onclick="saveVenda()">Registrar venda</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="historico-modal" onclick="closeModalOutside(event,'historico-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="historico-modal-title">Histórico</span>
+      <button class="modal-close" onclick="closeModal('historico-modal')">×</button>
+    </div>
+    <div id="historico-content"></div>
+  </div>
 </div>
 
 <script>
+// ── SUPABASE ──
+const SUPA_URL = 'https://jogywzmtaynthasbcjej.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZ3l3em10YXludGhhc2JjamVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjY4NDUsImV4cCI6MjA4OTgwMjg0NX0.tKA9hDvYizqBsdrz1AWEVP2zJmFhAkrYIzFistUwj_Y';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── STATE ──
+let currentUser = null;
+let currentProfile = null;
+let pacientes = [];
+let produtos = [];
+let vendas = [];
+let selectedPaciente = null;
+let selectedMonth = new Date().toISOString().slice(0,7);
 const profile = { sex: null, age: null };
+const conversationHistory = [];
+let isLoading = false;
 
-function selectProfile(type, value, btn) {
-  profile[type] = value;
-  const group = btn.closest('.profile-options');
-  group.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateProfileHint();
-}
-
-function updateProfileHint() {
-  const hint = document.getElementById('profile-hint');
-  if (profile.sex && profile.age) {
-    hint.textContent = `✓ Perfil ativo: ${profile.sex}, ${profile.age}`;
-    hint.style.color = 'var(--green-mid)';
-  } else if (profile.sex || profile.age) {
-    const missing = !profile.sex ? 'sexo' : 'faixa etária';
-    hint.textContent = `Selecione também o ${missing} para completar o perfil`;
-    hint.style.color = 'var(--amber)';
-  } else {
-    hint.textContent = 'Selecione o perfil do cliente para respostas mais precisas';
-    hint.style.color = 'var(--text-light)';
-  }
-}
-
-function buildProfileContext() {
-  if (!profile.sex && !profile.age) return '';
-  const parts = [];
-  if (profile.sex) parts.push(`Sexo: ${profile.sex}`);
-  if (profile.age) parts.push(`Faixa etária: ${profile.age}`);
-  return `\n\n[PERFIL DO CLIENTE: ${parts.join(' | ')}]`;
-}
-
+// ── SYSTEM PROMPT ──
 const SYSTEM_PROMPT = `Você é uma consultora especialista em óleos essenciais doTERRA com mais de 10 anos de experiência em aromaterapia clínica. Seu papel é ajudar consultoras doTERRA a atender seus clientes com segurança, precisão e profissionalismo.
 
 COMO VOCÊ RESPONDE:
@@ -261,483 +423,267 @@ COMO VOCÊ RESPONDE:
 - Sempre recomende acompanhamento médico para casos graves, crônicos ou com medicação
 - Mantenha o contexto da conversa para respostas mais precisas
 
-ESTRUTURA DA RESPOSTA (quando tiver informação suficiente):
+ESTRUTURA DA RESPOSTA:
 1. 🌿 Óleo(s) principal(is) recomendado(s) — com justificativa breve
-2. 📋 Como usar — modo de aplicação (tópico/difusor/interno), diluição exata
+2. 📋 Como usar — modo de aplicação, diluição exata
 3. ✨ Combinações e blends — o que potencializa
-4. ⚠️ Cuidados e contraindicações — grupos sensíveis, interações
-5. 💡 Dica de consultora — insight prático para a venda ou atendimento
-
-════════════════════════════════════════
-BASE DE CONHECIMENTO COMPLETA — ÓLEOS doTERRA
-════════════════════════════════════════
-
-━━━ ÓLEOS SINGLES ━━━
-
-ABETO SIBERIANO (Siberian Fir / Abies sibirica)
-- Usos: dores musculares pós-exercício, estresse, tensão, apoio respiratório leve, massagem relaxante
-- Aplicação: tópica (diluída), difusão
-- Diluição: 2-3% em carreador
-- Blends: Frankincense (relaxamento profundo), Lavanda (tensão), Eucalipto (respiração)
-- Contraindicações: evitar em gestantes e crianças <6 anos sem orientação
-
-ALECRIM (Rosemary / Rosmarinus officinalis)
-- Usos: fadiga mental, concentração, queda de cabelo, memória, dores musculares, circulação
-- Aplicação: tópica (couro cabeludo, têmporas), difusão, massagem
-- Diluição: 2-3% em carreador
-- Blends: Hortelã-pimenta (foco), Limão (energia), Lavanda (tensão capilar)
-- Contraindicações: NÃO usar em gestantes, epilépticos ou hipertensos; evitar em crianças <6 anos
-
-ARRUDA-CHEIROSA / MANJERICÃO (Basil / Ocimum basilicum)
-- Usos: foco mental, ansiedade leve, cólicas menstruais, gases, distensão abdominal, fadiga
-- Aplicação: tópica (abdômen, têmporas), difusão, interno (1 gota em cápsula)
-- Diluição: 1-2% em carreador
-- Blends: Hortelã (foco), Lavanda (ansiedade), Limão (energia)
-- Contraindicações: NÃO usar em gestantes; evitar uso prolongado interno; cuidado em epilépticos
-
-BERGAMOTA (Bergamot / Citrus bergamia)
-- Usos: ansiedade, depressão leve, TPM, insônia, estresse, autoestima, pele oleosa, digestão
-- Aplicação: difusão, tópica diluída, banho (5 gotas)
-- Diluição: 1-2% em carreador
-- Blends: Lavanda (ansiedade/sono), Ylang Ylang (equilíbrio emocional), Frankincense (paz interior)
-- Contraindicações: ALTAMENTE fotossensível — não aplicar em pele exposta ao sol por 12-18h; versão sem bergapteno é mais segura topicamente
-
-CARDAMOMO (Cardamom / Elettaria cardamomum)
-- Usos: náusea, indigestão, gases, congestão respiratória, hálito, ansiedade leve, tosse
-- Aplicação: difusão, tópica (peito, abdômen), interno (1 gota em água ou chá)
-- Diluição: 1-2% em carreador
-- Blends: Gengibre (digestão), Hortelã (respiração), Lavanda (relaxamento)
-- Contraindicações: cuidado em gestantes (uso interno); seguro em difusão
-
-CASSIA (Cassia / Cinnamomum cassia)
-- Usos: imunidade, metabolismo, circulação, glicemia (suporte), infecções leves
-- Aplicação: interno (1 gota em cápsula ou mel), difusão (potente), tópica (muito diluída)
-- Diluição: 0.5% — MUITO potente, pode irritar; sempre diluir bastante
-- Blends: Cravo (imunidade), Wild Orange (metabolismo), Gengibre (circulação)
-- Contraindicações: NÃO usar em gestantes; NÃO aplicar puro na pele; cuidado com anticoagulantes e hipoglicemiantes; irritante mucoso
-
-CEDRO (Cedarwood / Juniperus virginiana)
-- Usos: insônia, hiperatividade (TDAH), ansiedade, queda de cabelo, acne, eczema, foco em crianças
-- Aplicação: difusão (especialmente noturna), tópica (couro cabeludo, sola do pé, nuca), banho
-- Diluição: 2-3% em carreador
-- Blends: Lavanda (sono profundo), Vetiver (TDAH/foco), Frankincense (meditação), Roman Chamomile (crianças)
-- Contraindicações: evitar uso interno; cuidado na gestação
-
-CIPRESTE (Cypress / Cupressus sempervirens)
-- Usos: varizes, retenção de líquidos, celulite, edema, transpiração excessiva, ansiedade em transições, circulação
-- Aplicação: tópica (massagem nas pernas de baixo para cima), difusão
-- Diluição: 2-3% em carreador
-- Blends: Lemongrass (drenagem linfática), Gengibre (circulação), Lavanda (ansiedade)
-- Contraindicações: NÃO usar em gestantes; cuidado em hipertensos
-
-CILANTRO (Cilantro / Coriandrum sativum — folha)
-- Usos: detox, suporte digestivo, pele oleosa, limpeza intestinal, suporte imune
-- Aplicação: interno (1 gota em água), tópica diluída, difusão
-- Diluição: 1-2%
-- Blends: Limão (detox), Gengibre (digestão), Coentro (limpeza)
-- Contraindicações: cuidado em gestantes
-
-COENTRO (Coriander / Coriandrum sativum — semente)
-- Usos: digestão, gases, pele oleosa, suporte respiratório, ansiedade digestiva
-- Aplicação: interno, tópica, difusão
-- Diluição: 1-2%
-- Blends: Limão, Gengibre, Cardamomo
-- Contraindicações: seguro em doses normais; cuidado em gestantes (uso interno)
-
-COPAÍBA (Copaiba / Copaifera spp.)
-- Usos: anti-inflamatório potente, dores crônicas, ansiedade, neuropatia, artrite, pele irritada, suporte ao sistema nervoso
-- Aplicação: tópica (diluída), interno (1-2 gotas sublingual ou em cápsula), difusão
-- Diluição: 2-3%
-- Blends: Frankincense (anti-inflamatório sinérgico), Deep Blue (dores), Lavanda (nervoso)
-- Contraindicações: seguro para a maioria; cuidado com medicamentos anti-inflamatórios/anticoagulantes; gestantes consultar médico
-
-CRAVO (Clove / Eugenia caryophyllata)
-- Usos: dor de dente, infecções bucais, imunidade, antioxidante, antifúngico, dores musculares
-- Aplicação: tópico (gengiva — 1 gota pura em pequena área), interno (1 gota em cápsula), difusão
-- Diluição: 0.5-1% — irritante; sempre diluir
-- Blends: On Guard (imunidade), Wild Orange (proteção), Canela (antioxidante)
-- Contraindicações: NÃO usar em gestantes; NÃO aplicar puro em grandes áreas; pode interagir com anticoagulantes; evitar uso interno prolongado
-
-DOUGLAS FIR (Douglas Fir / Pseudotsuga menziesii)
-- Usos: purificação do ar, suporte respiratório, pele, energia, clareza mental
-- Aplicação: difusão, tópica diluída
-- Diluição: 2%
-- Blends: Eucalipto (respiração), Hortelã (energia), Lavanda (purificação)
-- Contraindicações: evitar em gestantes e crianças <6 anos
-
-ERVA-DOCE / FUNCHO (Fennel / Foeniculum vulgare)
-- Usos: digestão, gases, cólica, amenorreia, TPM, leite materno (apoia a produção), metabolismo
-- Aplicação: tópica (abdômen), interno (1 gota em chá), difusão
-- Diluição: 1-2%
-- Blends: Gengibre (digestão), DigestZen (intestino), Lavanda (cólica)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em bebês; cuidado em epilépticos; não usar por longos períodos
-
-EUCALIPTO (Eucalyptus / Eucalyptus radiata)
-- Usos: congestão nasal, sinusite, bronquite, tosse, gripe, dores musculares, concentração, febre (leve)
-- Aplicação: difusão, inalação direta, tópica no peito e costas (diluída), banho de vapor
-- Diluição: 2-3% adultos; 1% crianças 6-10 anos
-- Blends: Hortelã (respiração potente), Tea Tree (infecções respiratórias), Lavanda (tosse noturna), Breathe blend
-- Contraindicações: NÃO usar em crianças <6 anos (risco de espasmo laríngeo); cuidado em asmáticos; evitar na gestação; não aplicar próximo ao rosto de crianças
-
-FRANKINCENSE / OLÍBANO (Frankincense / Boswellia spp.)
-- Usos: anti-inflamatório, imunidade, ansiedade, meditação, pele envelhecida/manchada, cicatrização, suporte celular, articulações
-- Aplicação: tópica, difusão, sublingual/interno (somente doTERRA CPTG)
-- Diluição: 2-3%
-- Blends: Lavanda (pele/ansiedade), Mirra (imunidade/pele), Wild Orange (humor/imunidade), Copaíba (anti-inflamatório)
-- Contraindicações: muito seguro; evitar uso interno na gestação; pode potencializar anticoagulantes
-
-GENGIBRE (Ginger / Zingiber officinale)
-- Usos: náusea (gestação, quimioterapia, viagem), digestão lenta, gases, circulação, dores musculares/articulares, enjoo
-- Aplicação: difusão, tópica (abdômen, articulações), interno (1 gota em chá/água)
-- Diluição: 1-2% (pode irritar pele sensível)
-- Blends: Limão (imunidade+digestão), Hortelã (náusea), DigestZen (trato digestivo), Wild Orange (energia)
-- Contraindicações: pode irritar pele sensível; cuidado com anticoagulantes e hipoglicemiantes; uso interno com moderação na gestação — difusão é mais segura
-
-GERÂNIO (Geranium / Pelargonium graveolens)
-- Usos: TPM, menopausa, equilíbrio hormonal, pele matura/flácida, cicatrizes, repelente natural, ansiedade, pressão normal
-- Aplicação: tópica (face, abdômen), difusão, banho
-- Diluição: 1-2%
-- Blends: Lavanda (TPM/pele), Frankincense (pele matura), Rosa (equilíbrio emocional), Clary Sage (hormônios)
-- Contraindicações: seguro para a maioria; cuidado em hipotensão; moderação na gestação
-
-GRAPEFRUIT / TORANJA (Grapefruit / Citrus paradisi)
-- Usos: motivação, metabolismo, retenção de líquidos, celulite, humor, desejo de açúcar, suporte linfático
-- Aplicação: difusão, interno (1-2 gotas em água), tópica diluída
-- Diluição: 2%
-- Blends: Bergamota (humor), Wild Orange (metabolismo), Hortelã (energia), Cipreste (drenagem)
-- Contraindicações: fotossensível; cuidado com medicamentos — grapefruit interage com muitos fármacos (estatinas, anticoagulantes, etc.)
-
-HELICHRYSUM / SEMPRE-VIVA (Helichrysum / Helichrysum italicum)
-- Usos: cicatrizes, hematomas, pele danificada, anti-inflamatório, sistema nervoso, cansaço mental, cardiovascular
-- Aplicação: tópica (pura em pequenas áreas ou diluída), difusão
-- Diluição: 1-2% (um dos mais potentes para pele)
-- Blends: Frankincense (pele/cicatriz), Lavanda (regeneração), Rosa (anti-envelhecimento)
-- Contraindicações: muito seguro; cuidado com anticoagulantes (uso interno)
-
-HORTELÃ-PIMENTA (Peppermint / Mentha piperita)
-- Usos: dor de cabeça, náusea, fadiga mental, dores musculares, febre, congestão, foco, mau hálito, digestão
-- Aplicação: tópica (têmporas, nuca, peito — diluída), difusão, interno (1 gota em água — geleia capim limão)
-- Diluição: 1-2% adultos; 0.5% crianças 6+ anos
-- Blends: Lavanda (dor de cabeça), Wild Orange (energia), Eucalipto (respiração), Frankincense (foco)
-- Contraindicações: NÃO usar em crianças <6 anos; NÃO aplicar próximo ao nariz/rosto de bebês; cuidado em gestantes; não usar junto com homeopatia; pode antagonizar com ferro
-
-JASMIN (Jasmine / Jasminum grandiflorum)
-- Usos: humor deprimido, confiança, romance, suporte pós-parto, pele seca/matura, equilíbrio emocional feminino
-- Aplicação: tópica (puro — já vem diluído em Touch), difusão, perfume
-- Blends: Sândalo (sensualidade), Bergamota (autoestima), Rosa (feminino)
-- Contraindicações: seguro; uso com moderação na gestação
-
-JUNIPER BERRY / ZIMBRO (Juniper Berry / Juniperus communis)
-- Usos: detox, suporte renal, retenção de líquidos, pele oleosa/acne, sistema linfático, meditação, clareza mental
-- Aplicação: tópica diluída, difusão, banho (3 gotas)
-- Diluição: 1-2%
-- Blends: Cipreste (drenagem), Grapefruit (detox), Frankincense (meditação)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em doenças renais graves; uso por período limitado
-
-LAVANDA (Lavender / Lavandula angustifolia) — O óleo mais versátil
-- Usos: ansiedade, insônia, queimaduras leves, alergias, dor de cabeça tensional, irritação da pele, picadas de inseto, TPM, bebês (com diluição)
-- Aplicação: tópica (pode usar puro em pequenas áreas — único óleo seguro assim), difusão, banho, travesseiro
-- Diluição: adultos 2-5%; crianças >2 anos 0.5-1%; bebês 3m+ 0.2% apenas para difusão
-- Blends: Bergamota (relaxamento), Frankincense (meditação/pele), Cedro (sono), Roman Chamomile (bebês/crianças)
-- Contraindicações: muito seguro; cuidado em bebês <3 meses; pode potencializar sedativos
-
-LEMON / LIMÃO (Lemon / Citrus limon)
-- Usos: energia, imunidade, náusea, humor, desintoxicação, limpeza, digestão, garganta
-- Aplicação: difusão, interno (1-2 gotas em água — copo plástico não; vidro ou inox), tópica diluída
-- Diluição: 1-2%
-- Blends: Hortelã (energia+foco), Lavanda+Tea Tree (imunidade), Gengibre (digestão+imunidade)
-- Contraindicações: FOTOSSENSÍVEL — não aplicar em pele antes do sol; cuidado em gastrite/refluxo (uso interno)
-
-LEMONGRASS / CAPIM-LIMÃO (Lemongrass / Cymbopogon flexuosus)
-- Usos: dores musculares/articulares, drenagem linfática, repelente natural, digestão, ansiedade, purificação ambiental
-- Aplicação: tópica diluída (massagem), difusão
-- Diluição: 1% (irritante — sempre diluir bem)
-- Blends: Cipreste (drenagem), Gengibre (circulação), Tea Tree (repelente)
-- Contraindicações: NÃO usar puro na pele (irritante); cuidado em gestantes e pele sensível
-
-LIMA (Lime / Citrus aurantifolia)
-- Usos: imunidade, metabolismo, humor, colesterol, glicemia, suporte digestivo, energia
-- Aplicação: interno, difusão, tópica diluída
-- Diluição: 1-2%
-- Blends: Wild Orange (energia), Coco (humor), Gengibre (imunidade)
-- Contraindicações: fotossensível; moderação no uso interno
-
-MANJERONA (Marjoram / Origanum marjorana)
-- Usos: dores musculares, tensão nervosa, insônia, sistema imune, câimbras, pressão arterial leve, suporte digestivo
-- Aplicação: tópica (músculos, abdômen), difusão
-- Diluição: 2-3%
-- Blends: Lavanda (relaxamento), Deep Blue (dores), Alecrim (músculo)
-- Contraindicações: NÃO usar em gestantes (estimula útero); cuidado em hipotensão
-
-MELALEUCA / TEA TREE (Melaleuca / Melaleuca alternifolia)
-- Usos: antifúngico, antibacteriano, acne, candidíase, micose, feridas, caspa, unhas, limpeza bucal
-- Aplicação: tópica (pode usar puro em pequenas áreas), difusão — NÃO ingerir
-- Diluição: 1-2% uso geral; puro em pontos específicos adultos
-- Blends: Lavanda (pele/acne), Limão (limpeza), Orégano (infecções fúngicas), On Guard (imunidade)
-- Contraindicações: NÃO ingerir; pode irritar mucosas; cuidado em crianças pequenas
-
-MELISSA / ERVA-CIDREIRA (Melissa / Melissa officinalis)
-- Usos: ansiedade intensa, herpes labial, suporte celular (mama, ovários), sistema nervoso, equilíbrio emocional
-- Aplicação: tópica (herpes labial — puro; demais áreas diluída), difusão, interno (1 gota)
-- Diluição: 1% (muito potente e raro)
-- Blends: Lavanda (ansiedade), Frankincense (suporte celular), Bergamota (equilíbrio emocional)
-- Contraindicações: hipotireoidismo (pode reduzir função da tireoide); cuidado com sedativos; gestantes consultar médico
-
-MIRRA (Myrrh / Commiphora myrrha)
-- Usos: pele matura/rachada, cicatrizes, gengiva/boca, equilíbrio emocional, imunidade, cicatrização
-- Aplicação: tópica (pés, gengiva, cicatrizes), difusão, interno (1 gota)
-- Diluição: 1-2%
-- Blends: Frankincense (imunidade/pele), Lavanda (cicatrizes), On Guard (proteção)
-- Contraindicações: NÃO usar em gestantes (estimula contrações)
-
-NEROLI (Neroli / Citrus aurantium — flor)
-- Usos: ansiedade, estrias, pele sensível, menopausa, equilíbrio emocional, autoestima, insônia
-- Aplicação: tópica (face, abdômen, pulso), difusão
-- Diluição: 1% (muito concentrado)
-- Blends: Lavanda (ansiedade), Jasmin (feminino), Rosa (pele delicada)
-- Contraindicações: seguro; moderação na gestação
-
-ORÉGANO (Oregano / Origanum vulgare) — Um dos mais potentes
-- Usos: antibacteriano potente, antiviral, antifúngico, imunidade intensa, infecções recorrentes, candidíase sistêmica
-- Aplicação: interno (1 gota em cápsula com mel ou azeite — NUNCA puro), tópica muito diluída (sola do pé)
-- Diluição: 0.5-1% — extremamente irritante puro
-- Blends: Limão+Frankincense (imunidade potente), On Guard (proteção), Tea Tree (antifúngico)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em crianças; pode interagir com anticoagulantes e antidiabéticos; usar em ciclos curtos (máx. 10 dias); MUITO potente
-
-PATCHOULI (Patchouli / Pogostemon cablin)
-- Usos: pele matura, rugas, eczema, celulite, equilíbrio emocional, ansiedade, libido, meditação
-- Aplicação: tópica (face, corpo), difusão, perfume
-- Diluição: 1-2%
-- Blends: Frankincense (pele), Sândalo (meditação/romance), Bergamota (humor)
-- Contraindicações: seguro para a maioria; use com moderação
-
-PETITGRAIN (Petitgrain / Citrus aurantium — ramo)
-- Usos: ansiedade, tensão nervosa, insônia, suporte cardíaco, digestão nervosa — "lavanda masculina"
-- Aplicação: difusão, tópica diluída, banho
-- Diluição: 2%
-- Blends: Lavanda (ansiedade/sono), Bergamota (estresse), Frankincense (equilíbrio)
-- Contraindicações: seguro; cuidado em hipotensão
-
-PIMENTA-PRETA (Black Pepper / Piper nigrum)
-- Usos: circulação, digestão, dores musculares/articulares, vícios (tabagismo), aquecimento, metabolismo
-- Aplicação: tópica (músculos — diluída), interno (1 gota em alimento), difusão
-- Diluição: 1-2%
-- Blends: Frankincense (articulações), Deep Blue (músculo), Gengibre (circulação)
-- Contraindicações: irritante em pele sensível; potencializa absorção de outros óleos
-
-ROMAN CHAMOMILE / CAMOMILA ROMANA (Roman Chamomile / Anthemis nobilis)
-- Usos: crianças (cólica, choro, dentição, insônia), pele sensível/irritada, ansiedade, irritabilidade, eczema
-- Aplicação: tópica muito diluída, difusão
-- Diluição: 0.5-1% para crianças; 1-2% adultos
-- Blends: Lavanda (crianças/sono), Cedro (TDAH), Frankincense (ansiedade)
-- Contraindicações: alergia a plantas da família asteraceae (margarida); seguro para bebês e crianças com diluição adequada
-
-ROSA (Rose / Rosa damascena)
-- Usos: pele seca/matura, confiança, amor próprio, luto, equilíbrio emocional feminino, anti-envelhecimento
-- Aplicação: tópica (face), difusão, perfume
-- Diluição: 0.5-1% (muito concentrado e precioso)
-- Blends: Frankincense (anti-envelhecimento), Gerânio (equilíbrio hormonal), Jasmim (feminino)
-- Contraindicações: seguro; moderação na gestação
-
-SÁLVIA ESCLAREIA (Clary Sage / Salvia sclarea)
-- Usos: TPM, menopausa, cólica menstrual, equilíbrio hormonal, ansiedade, insônia hormonal, trabalho de parto (só no final da gestação e com acompanhamento)
-- Aplicação: tópica (abdômen, pulso), difusão
-- Diluição: 2-3%
-- Blends: Gerânio (hormônios), Lavanda (ansiedade), Fennel (ciclo menstrual)
-- Contraindicações: NÃO usar no 1º e 2º trimestre de gestação; pode estimular o útero; NÃO combinar com álcool (potencializa efeito sedativo)
-
-SÂNDALO (Sandalwood / Santalum album ou S. paniculatum)
-- Usos: meditação, pele seca/matura, cabelo, libido, sono, ansiedade profunda, foco espiritual
-- Aplicação: tópica (face, couro cabeludo), difusão, meditação
-- Diluição: 1-2%
-- Blends: Frankincense (meditação), Ylang Ylang (romance), Patchouli (aterramento)
-- Contraindicações: muito seguro; um dos mais suaves
-
-SPEARMINT / HORTELÃ-VERDE (Spearmint / Mentha spicata)
-- Usos: digestão, náusea leve, hálito, foco (mais suave que hortelã-pimenta), energia, crianças (alternativa segura ao peppermint)
-- Aplicação: difusão, interno (1 gota em água/chá), tópica diluída
-- Diluição: 1-2%
-- Blends: Limão (digestão), Gengibre (náusea), Wild Orange (energia)
-- Contraindicações: mais segura que hortelã-pimenta; ainda assim evitar em crianças <3 anos perto do rosto; cuidado com homeopatia
-
-SPIKENARD / NARDO (Spikenard / Nardostachys jatamansi)
-- Usos: sono profundo, ansiedade crônica, meditação, suporte imune, pele
-- Aplicação: tópica (sola do pé, pulso), difusão noturna
-- Diluição: 2%
-- Blends: Lavanda (sono), Vetiver (aterramento), Frankincense (espiritual)
-- Contraindicações: NÃO usar em gestantes (estimula útero)
-
-TANGERINA (Tangerine / Citrus reticulata)
-- Usos: digestão, humor, crianças (segura e agradável), metabolismo, ansiedade leve, purificação
-- Aplicação: difusão, interno (1 gota em água), tópica diluída
-- Diluição: 1-2%
-- Blends: Wild Orange (energia), Lavanda (sono em crianças), Limão (digestão)
-- Contraindicações: fotossensível; muito segura inclusive para crianças em difusão
-
-THYME / TOMILHO (Thyme / Thymus vulgaris)
-- Usos: infecções bacterianas, imunidade, suporte respiratório, digestão, ciclo menstrual
-- Aplicação: tópica (muito diluída), interno (1 gota em cápsula), difusão
-- Diluição: 0.5% — irritante
-- Blends: On Guard (imunidade), Orégano (infecções potentes), Limão (respiração)
-- Contraindicações: NÃO usar em gestantes; irritante mucoso; cuidado em hipertireoidismo; evitar em crianças <6 anos
-
-VETIVER (Vetiver / Vetiveria zizanoides)
-- Usos: TDAH (foco em crianças), ansiedade profunda, trauma, aterramento emocional, insônia severa, suporte imune
-- Aplicação: tópica (sola do pé — muito eficaz, nuca), difusão noturna
-- Diluição: 2-3% (viscoso — misturar bem)
-- Blends: Lavanda (sono/ansiedade), Cedro (TDAH), Frankincense (trauma emocional), Roman Chamomile (crianças)
-- Contraindicações: muito seguro; use com moderação na gestação
-
-WILD ORANGE / LARANJA SELVAGEM (Wild Orange / Citrus sinensis)
-- Usos: humor, imunidade, energia, criatividade, ansiedade, digestão, antioxidante
-- Aplicação: difusão, interno (1-2 gotas em água), tópica diluída
-- Diluição: 2%
-- Blends: Canela (imunidade quente), Hortelã (energia+foco), Frankincense (imunidade diária)
-- Contraindicações: fotossensível; moderação no uso interno
-
-WINTERGREEN / GAULTÉRIA (Wintergreen / Gaultheria procumbens)
-- Usos: dores musculares e articulares intensas, dor de dente, dores de cabeça tensionais, massagem desportiva
-- Aplicação: tópica SEMPRE diluída, massagem
-- Diluição: 1% máximo — muito potente (salicilato de metila)
-- Blends: Deep Blue (dores musculares), Hortelã (dor de cabeça), Lavanda (tensão)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em crianças; NÃO ingerir; NÃO usar com aspirina/anticoagulantes — risco de toxicidade por salicilato
-
-YLANG YLANG (Ylang Ylang / Cananga odorata)
-- Usos: libido, equilíbrio hormonal, ansiedade, pressão arterial elevada, TPM, cabelo, equilíbrio emocional
-- Aplicação: difusão (pouco — muito intenso), tópica muito diluída, banho
-- Diluição: 0.5-1% (MUITO potente — excesso causa dor de cabeça e náusea)
-- Blends: Bergamota (romance), Lavanda (relaxamento profundo), Sândalo (sensualidade)
-- Contraindicações: NÃO exagerar na quantidade — 1-2 gotas máx. no difusor; cuidado em hipotensão; moderação na gestação
-
-━━━ BLENDS PROPRIETÁRIOS doTERRA ━━━
-
-ON GUARD (Proteção / Imunidade)
-- Composição: Wild Orange, Cravo, Canela, Eucalipto, Alecrim
-- Usos: imunidade preventiva, infecções respiratórias, ambientes com muita gente, limpeza de superfícies, proteção sazonal
-- Aplicação: difusão, tópica (sola do pé, coluna — diluído), gargarejo diluído, superfícies
-- Diluição: 2-3% para tópico
-- Blends adicionais: Limão (proteção extra), Frankincense (celular)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em crianças <6 anos por via tópica; cuidado com anticoagulantes
-
-DEEP BLUE (Alívio de Dores)
-- Composição: Gaultéria, Camomila Azul, Hortelã, Ylang Ylang, Osmanthus, Tanaceto
-- Usos: dores musculares, dores articulares, artrite, lesões esportivas, dores crônicas, tensão muscular, dores nas costas
-- Aplicação: tópica (SEMPRE diluída), massagem
-- Diluição: 2-3% — já vem para diluir
-- Blends: Copaíba (anti-inflamatório sinérgico), Frankincense (articulações), Pimenta-preta (circulação)
-- Contraindicações: NÃO usar em gestantes; NÃO usar em crianças <6 anos; NÃO ingerir; cuidado com anticoagulantes
-
-DIGESTZEN (Digestão)
-- Composição: Gengibre, Funcho, Coentro, Cardamomo, Hortelã, Anis, Manjericão
-- Usos: indigestão, gases, distensão abdominal, náusea, azia, síndrome do intestino irritável, cólica, vômito, viagem
-- Aplicação: tópica (abdômen — massagem circular), interno (1-2 gotas em água ou cápsula), difusão
-- Diluição: 2% para tópico
-- Blends: Gengibre (náusea extra), Cardamomo (estômago), Hortelã (digestão)
-- Contraindicações: NÃO usar em gestantes (contém manjericão e funcho); crianças >6 anos com supervisão
-
-BREATHE (Respiração)
-- Composição: Laurel, Eucalipto, Tea Tree, Lemon, Cardamomo, Ravintsara, Peppermint
-- Usos: congestão, asma (suporte), bronquite, sinusite, ronco, apneia leve, alergias respiratórias, resfriado
-- Aplicação: difusão, tópica (peito e costas — diluída), inalação direta (1 gota na palma)
-- Diluição: 2% para tópico
-- Blends: Eucalipto (congestão extra), On Guard (infecções respiratórias)
-- Contraindicações: NÃO aplicar próximo ao rosto de crianças <3 anos; cuidado em asma grave; moderação na gestação
-
-BALANCE (Aterramento / Equilíbrio)
-- Composição: Abeto Siberiano, Rosalina, Frankincense, Blue Tansy, Blue Chamomile, Osmanthus
-- Usos: ansiedade, estresse, trauma, TDAH, labilidade emocional, meditação, equilíbrio do sistema nervoso
-- Aplicação: tópica (nuca, sola do pé, pulso), difusão
-- Diluição: 2%
-- Contraindicações: seguro para a maioria; moderação na gestação
-
-SERENITY (Calmante / Sono)
-- Composição: Lavanda, Cedro, Ho Wood, Ylang Ylang, Frankincense, Roman Chamomile, Vetiver, Sandalwood, Bergamota
-- Usos: insônia, ansiedade noturna, estresse, hiperatividade em crianças, relaxamento pré-sono
-- Aplicação: difusão noturna, tópica (sola do pé, pulso, pescoço)
-- Diluição: 2%
-- Contraindicações: pode potencializar sedativos; moderação na gestação
-
-ADAPTIV (Adaptação / Tensão)
-- Composição: Lavanda, Magnólia, Neroli, Spearmint
-- Usos: estresse agudo, ansiedade situacional, pressão no trabalho, mudanças, tensão emocional
-- Aplicação: difusão, tópica (pulso, pescoço)
-- Diluição: 2%
-- Contraindicações: muito seguro; moderação na gestação
-
-━━━ PROTOCOLOS POR SITUAÇÃO ━━━
-
-GESTANTES (sempre confirmar trimestre):
-- 1º trimestre: APENAS difusão de Lavanda e Gengibre (náusea) — nada tópico
-- 2º trimestre: Lavanda tópica diluída (1%), Frankincense difusão, Gengibre difusão/tópico leve
-- 3º trimestre: Lavanda, Frankincense, Gerânio (com moderação), Neroli; evitar todos os demais
-- NUNCA em qualquer trimestre: Orégano, Manjericão, Funcho, Mirra, Sálvia Esclareia, Cipreste, Alecrim, Cassia, Cravo, On Guard tópico, Wintergreen, Spikenard
-
-BEBÊS 0-3 MESES: apenas Lavanda em difusão (2 gotas máx.), nunca tópico
-
-BEBÊS 3-12 MESES: Lavanda 0.2% tópica; Roman Chamomile 0.2%; difusão moderada de Lavanda, Tangerina
-
-CRIANÇAS 1-5 ANOS: Lavanda 1%, Roman Chamomile 0.5%, Cedro 1%, Tangerina, Frankincense 0.5% — NUNCA Hortelã-pimenta, Eucalipto, Orégano, Cravo, Cassia
-
-CRIANÇAS 6-12 ANOS: mesmas restrições acima com diluição de 1%; Eucalipto pode (1%); Hortelã pode (0.5%)
-
-IDOSOS: sempre metade da dose adulto; cuidado especial com anticoagulantes (Frankincense, Gaultéria, Orégano, Cravo); monitorar pressão (Ylang Ylang, Gerânio)
-
-PETS: NUNCA usar em gatos (toxicidade severa: Tea Tree, Hortelã, Lavanda); cães toleram alguns óleos muito diluídos — orientar sempre buscar veterinário
-
-━━━ DIRETRIZES GERAIS DE SEGURANÇA ━━━
-- Óleos fotossensíveis (não aplicar antes do sol): Limão, Lima, Bergamota, Grapefruit, Tangerina, Wild Orange
-- Óleos quentes (sempre diluir muito): Orégano, Cassia, Cravo, Canela, Tomilho
-- Óleos que NÃO se ingere: Tea Tree, Eucalipto, Wintergreen, Cedro
-- Interações medicamentosas críticas: anticoagulantes (Wintergreen, Orégano, Cravo, Frankincense); antiglicemiantes (Cassia, Orégano); sedativos (Lavanda, Ylang Ylang, Sálvia Esclareia); medicamentos cardíacos (Ylang Ylang, Gerânio); grapefruit interage com dezenas de medicamentos
-- Óleo carreador recomendado doTERRA: Fracionado de Coco (FCO) — não mancha, absorção rápida`;
-
-let isLoading = false;
-const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('input');
-const sendBtn = document.getElementById('sendBtn');
-const conversationHistory = [];
+4. ⚠️ Cuidados e contraindicações
+5. 💡 Dica de consultora — insight prático
+
+BASE DE CONHECIMENTO — ÓLEOS doTERRA:
+
+LAVANDA (Lavandula angustifolia): ansiedade, insônia, queimaduras, alergias, dor de cabeça, pele irritada. Diluição: adultos 2-5%; crianças >2 anos 0.5-1%. Blends: Bergamota, Frankincense, Cedro. Seguro para gestantes em aromaterapia.
+
+HORTELÃ-PIMENTA (Mentha piperita): dor de cabeça, náusea, fadiga, dores musculares, congestão. Diluição: 1-2% adultos. NÃO em crianças <6 anos, gestantes, junto com homeopatia.
+
+FRANKINCENSE (Boswellia spp.): anti-inflamatório, imunidade, ansiedade, pele matura, articulações. Diluição: 2-3%. Blends: Lavanda, Mirra, Wild Orange, Copaíba.
+
+LIMÃO (Citrus limon): energia, imunidade, náusea, detox. Fotossensível. Difusão ou interno (vidro/inox). Blends: Hortelã, Gengibre.
+
+TEA TREE/MELALEUCA (Melaleuca alternifolia): antifúngico, antibacteriano, acne, candidíase, micose. Pode usar puro em pequenas áreas. NÃO ingerir.
+
+EUCALIPTO (Eucalyptus radiata): congestão, sinusite, bronquite, tosse. NÃO em crianças <6 anos. Diluição: 2-3% adultos.
+
+BERGAMOTA (Citrus bergamia): ansiedade, depressão leve, TPM, insônia. Fotossensível. Diluição: 1-2%.
+
+WILD ORANGE (Citrus sinensis): humor, imunidade, energia, antioxidante. Fotossensível. Blends: Canela, Hortelã, Frankincense.
+
+ORÉGANO (Origanum vulgare): antibacteriano potente, antifúngico, imunidade intensa. NÃO em gestantes nem crianças. Sempre em cápsula/mel. Ciclos curtos.
+
+GENGIBRE (Zingiber officinale): náusea (inclusive gestantes em difusão), digestão, circulação, dores. Diluição: 1-2%.
+
+CEDRO (Juniperus virginiana): insônia, TDAH, ansiedade, queda de cabelo. Difusão noturna. Blends: Lavanda, Vetiver, Frankincense.
+
+YLANG YLANG (Cananga odorata): libido, pressão, TPM, equilíbrio emocional. MUITO potente — 1-2 gotas máx. Diluição: 0.5-1%.
+
+COPAÍBA (Copaifera spp.): anti-inflamatório potente, dores crônicas, ansiedade, pele. Blends: Frankincense, Deep Blue.
+
+ROMAN CHAMOMILE (Anthemis nobilis): crianças, pele sensível, ansiedade, irritabilidade. Diluição: 0.5-1%.
+
+VETIVER (Vetiveria zizanoides): TDAH, ansiedade profunda, insônia severa, aterramento. Sola do pé muito eficaz.
+
+CLARY SAGE/SÁLVIA ESCLAREIA (Salvia sclarea): TPM, menopausa, cólica, hormônios. NÃO no 1º/2º trimestre.
+
+GERÂNIO (Pelargonium graveolens): TPM, menopausa, pele, cicatrizes, repelente. Blends: Lavanda, Frankincense.
+
+ALECRIM (Rosmarinus officinalis): foco, memória, cabelo, circulação. NÃO em gestantes, epilépticos, hipertensos.
+
+HELICHRYSUM (Helichrysum italicum): cicatrizes, hematomas, pele danificada, anti-inflamatório. Um dos mais potentes para pele.
+
+MIRRA (Commiphora myrrha): pele rachada, gengiva, imunidade. NÃO em gestantes.
+
+PATCHOULI (Pogostemon cablin): pele matura, celulite, equilíbrio emocional, meditação.
+
+SÂNDALO (Santalum spp.): meditação, pele seca, cabelo, libido, sono.
+
+NEROLI (Citrus aurantium): ansiedade, estrias, menopausa, pele delicada. Diluição: 1%.
+
+MELISSA (Melissa officinalis): ansiedade intensa, herpes labial, suporte celular. Cuidado com hipotireoidismo.
+
+WINTERGREEN (Gaultheria procumbens): dores musculares/articulares intensas. NÃO em gestantes/crianças. NÃO com anticoagulantes.
+
+FENNEL/FUNCHO (Foeniculum vulgare): digestão, cólica, TPM, leite materno. NÃO em gestantes e bebês.
+
+CIPRESTE (Cupressus sempervirens): varizes, retenção, celulite, circulação. NÃO em gestantes.
+
+BERGAMOTA, LIMÃO, LIME, GRAPEFRUIT, WILD ORANGE, TANGERINA: todos fotossensíveis.
+
+BLENDS PROPRIETÁRIOS:
+ON GUARD: imunidade preventiva, infecções, proteção sazonal. NÃO em gestantes, crianças <6 anos.
+DEEP BLUE: dores musculares e articulares, lesões, artrite. Sempre diluído. NÃO em gestantes/crianças.
+DIGESTZEN: indigestão, gases, náusea, cólica, viagem. Tópico (abdômen) ou interno. NÃO em gestantes.
+BREATHE: congestão, asma (suporte), sinusite, ronco. Difusão ou tópico. Moderação na gestação.
+BALANCE: ansiedade, TDAH, trauma, meditação, equilíbrio nervoso. Muito seguro.
+SERENITY: insônia, ansiedade noturna, hiperatividade. Pode potencializar sedativos.
+ADAPTIV: estresse agudo, ansiedade situacional, pressão. Muito seguro.
+
+SEGURANÇA POR PERFIL:
+GESTANTES 1º trim: APENAS difusão de Lavanda e Gengibre.
+GESTANTES 2º/3º trim: Lavanda, Frankincense, Gerânio (moderação), Neroli.
+NUNCA em gestantes: Orégano, Manjericão, Funcho, Mirra, Sálvia Esclareia, Cipreste, Alecrim, Cassia, Cravo, On Guard tópico, Wintergreen, Spikenard.
+BEBÊS 0-3m: só Lavanda em difusão (2 gotas máx).
+BEBÊS 3-12m: Lavanda 0.2%, Roman Chamomile 0.2%.
+CRIANÇAS 1-5 anos: Lavanda 1%, Roman Chamomile, Cedro, Tangerina. NUNCA Hortelã-pimenta, Eucalipto, Orégano.
+CRIANÇAS 6-12 anos: Eucalipto 1%, Hortelã 0.5%.
+IDOSOS: metade da dose; cuidado com anticoagulantes.
+
+INTERAÇÕES CRÍTICAS:
+Anticoagulantes: Wintergreen, Orégano, Cravo, Frankincense.
+Antiglicemiantes: Cassia, Orégano.
+Sedativos: Lavanda, Ylang Ylang, Sálvia Esclareia.
+Grapefruit: interage com dezenas de medicamentos (estatinas, anticoagulantes etc).`;
+
+// ── AUTH ──
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await onLogin(session.user);
+  else showAuth();
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) await onLogin(session.user);
+    if (event === 'SIGNED_OUT') showAuth();
+  });
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+async function onLogin(user) {
+  currentUser = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  await loadProfile();
+  await loadPacientes();
+  await loadProdutos();
+  renderWelcome();
+  buildMonthFilter();
+  await loadVendas();
+  await loadContaStats();
+}
+
+function toggleAuth(mode) {
+  document.getElementById('login-card').classList.toggle('hidden', mode !== 'login');
+  document.getElementById('register-card').classList.toggle('hidden', mode !== 'register');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) return showToast('Preencha e-mail e senha', true);
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) showToast('E-mail ou senha incorretos', true);
+}
+
+async function doRegister() {
+  const nome = document.getElementById('reg-nome').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!nome || !email || !pass) return showToast('Preencha todos os campos', true);
+  if (pass.length < 6) return showToast('Senha deve ter mínimo 6 caracteres', true);
+  const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { nome } } });
+  if (error) showToast(error.message, true);
+  else showToast('Conta criada! Verifique seu e-mail.');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = data;
+  if (data) {
+    document.getElementById('conta-nome').textContent = data.nome || '—';
+    document.getElementById('conta-email').textContent = data.email || '—';
+    const inicial = (data.nome || 'U')[0].toUpperCase();
+    document.getElementById('conta-avatar').textContent = inicial;
+  }
+}
+
+// ── NAVIGATION ──
+function showPage(page) {
+  ['chat','pacientes','financeiro','conta'].forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
+    document.getElementById('nav-' + p).classList.toggle('active', p === page);
+  });
+  document.getElementById('patient-bar').classList.toggle('hidden', page !== 'chat');
+  document.getElementById('chat-input-area').classList.toggle('hidden', page !== 'chat');
+  if (page === 'pacientes') renderPacientes();
+  if (page === 'financeiro') renderFinanceiro();
+  if (page === 'conta') loadContaStats();
+}
+
+// ── PROFILE SELECTOR ──
+function selectProfile(type, value, btn) {
+  profile[type] = value;
+  btn.closest('.profile-options').querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateProfileHint();
+}
+function updateProfileHint() {
+  const hint = document.getElementById('profile-hint');
+  if (profile.sex && profile.age) {
+    hint.textContent = `✓ Perfil: ${profile.sex}, ${profile.age}`;
+    hint.style.color = 'var(--green-mid)';
+  } else {
+    hint.textContent = 'Selecione o perfil do cliente para respostas mais precisas';
+    hint.style.color = 'var(--text-light)';
+  }
+}
+function buildProfileContext() {
+  const parts = [];
+  if (selectedPaciente) {
+    const p = pacientes.find(x => x.id === selectedPaciente);
+    if (p) {
+      parts.push(`Paciente: ${p.nome}`);
+      if (p.sexo) parts.push(`Sexo: ${p.sexo}`);
+      if (p.idade) parts.push(`Idade: ${p.idade} anos`);
+      if (p.condicoes_saude) parts.push(`Condições de saúde: ${p.condicoes_saude}`);
+      if (p.medicamentos) parts.push(`Medicamentos: ${p.medicamentos}`);
+      if (p.alergias) parts.push(`Alergias: ${p.alergias}`);
+      if (p.observacoes) parts.push(`Obs: ${p.observacoes}`);
+    }
+  } else {
+    if (profile.sex) parts.push(`Sexo: ${profile.sex}`);
+    if (profile.age) parts.push(`Faixa etária: ${profile.age}`);
+  }
+  return parts.length ? `\n\n[PERFIL DO CLIENTE: ${parts.join(' | ')}]` : '';
+}
+
+// ── CHAT ──
+function renderWelcome() {
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = `
+    <div style="background:var(--green-deep);border-radius:16px;padding:22px 20px;color:white;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:-15px;top:-15px;width:100px;height:100px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:8px;line-height:1.3;">Olá! Sou sua assistente doTERRA 🌿</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,.72);line-height:1.6;">Selecione um paciente ou o perfil acima, depois descreva o sintoma para receber a recomendação ideal.</p>
+      <div class="chips" style="margin-top:14px;">
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Dor de cabeça forte, adulta, não grávida')">Dor de cabeça</button>
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Criança de 5 anos com tosse e congestão')">Tosse em criança</button>
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Insônia e ansiedade, quer relaxar')">Insônia / Ansiedade</button>
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Dor muscular após treino')">Dor muscular</button>
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Mulher com TPM, cólica e irritabilidade')">TPM e cólica</button>
+        <button class="chip" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.9);" onclick="sendChip('Gestante de 2º trimestre com náusea')">Gestante</button>
+      </div>
+    </div>`;
+}
 
 function novaConsulta() {
-  if (conversationHistory.length > 0 && !confirm('Iniciar nova consulta? O histórico atual será apagado.')) return;
+  if (conversationHistory.length > 0 && !confirm('Iniciar nova consulta? O histórico será apagado.')) return;
   conversationHistory.length = 0;
-  profile.sex = null;
-  profile.age = null;
+  profile.sex = null; profile.age = null;
   document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
   updateProfileHint();
-  const msgs = document.getElementById('messages');
-  msgs.innerHTML = '';
-  const welcome = document.createElement('div');
-  welcome.className = 'welcome-card';
-  welcome.innerHTML = `
-    <h2>Nova consulta iniciada 🌿</h2>
-    <p>Selecione o perfil do cliente acima e descreva o sintoma ou situação para receber a recomendação ideal.</p>
-    <div class="chips">
-      <button class="chip" onclick="sendChip('Cliente adulta com dor de cabeça forte, não grávida')">Dor de cabeça</button>
-      <button class="chip" onclick="sendChip('Criança de 5 anos com tosse e congestão nasal')">Tosse em criança</button>
-      <button class="chip" onclick="sendChip('Adulto com insônia e ansiedade, quer relaxar')">Insônia / Ansiedade</button>
-      <button class="chip" onclick="sendChip('Cliente com dor muscular após treino')">Dor muscular</button>
-      <button class="chip" onclick="sendChip('Quero um blend para difusor que dê energia e foco')">Foco e energia</button>
-      <button class="chip" onclick="sendChip('Mulher com TPM, cólica e irritabilidade')">TPM e cólica</button>
-      <button class="chip" onclick="sendChip('Cliente idoso com articulações doendo e dificuldade para dormir')">Cliente idoso</button>
-      <button class="chip" onclick="sendChip('Gestante de 2º trimestre com náusea e ansiedade')">Gestante</button>
-    </div>`;
-  msgs.appendChild(welcome);
+  document.getElementById('patient-select').value = '';
+  selectedPaciente = null;
+  renderWelcome();
 }
 
+function onPatientSelect() {
+  const id = document.getElementById('patient-select').value;
+  selectedPaciente = id || null;
+  if (id) {
+    const p = pacientes.find(x => x.id === id);
+    if (p) {
+      if (p.sexo) { document.querySelectorAll('.profile-btn').forEach(b => { if (b.textContent.includes(p.sexo)) { b.classList.add('active'); profile.sex = p.sexo; } }); }
+      updateProfileHint();
+      const hint = document.getElementById('profile-hint');
+      hint.textContent = `✓ Paciente: ${p.nome}${p.condicoes_saude ? ' · ' + p.condicoes_saude : ''}`;
+      hint.style.color = 'var(--green-mid)';
+    }
+  }
+}
 
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-function sendChip(text) { inputEl.value = text; sendMessage(); }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function sendChip(text) { document.getElementById('chat-input').value = text; sendMessage(); }
 
 function formatResponse(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/^#{1,3} (.+)$/gm, '<span class="section-title">$1</span>')
     .replace(/⚠️([^\n]+)/g, '<div class="warning">⚠️$1</div>')
     .replace(/^[-•] (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>[\s\S]*?<\/li>)+/g, m => '<ul>' + m + '</ul>')
@@ -745,66 +691,309 @@ function formatResponse(text) {
 }
 
 async function sendMessage() {
-  const text = inputEl.value.trim();
+  const text = document.getElementById('chat-input').value.trim();
   if (!text || isLoading) return;
   const profileCtx = buildProfileContext();
-  const messageWithProfile = profileCtx ? `${text}${profileCtx}` : text;
-  addMessage('user', text);
-  inputEl.value = '';
-  inputEl.style.height = 'auto';
-  conversationHistory.push({ role: 'user', content: messageWithProfile });
-  const typingEl = addTyping();
+  const msgWithCtx = profileCtx ? text + profileCtx : text;
+  addMsg('user', text);
+  document.getElementById('chat-input').value = '';
+  document.getElementById('chat-input').style.height = 'auto';
+  conversationHistory.push({ role: 'user', content: msgWithCtx });
+  const typing = addTyping();
   isLoading = true;
-  sendBtn.disabled = true;
+  document.getElementById('send-btn').disabled = true;
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: conversationHistory
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: conversationHistory })
     });
-    const data = await response.json();
+    const data = await res.json();
     const reply = data.content?.map(b => b.text || '').join('') || 'Desculpe, não consegui processar.';
-    typingEl.remove();
+    typing.remove();
     conversationHistory.push({ role: 'assistant', content: reply });
-    addMessage('ai', reply);
-  } catch (err) {
-    typingEl.remove();
-    addMessage('ai', 'Erro ao conectar com a IA. Verifique sua conexão e tente novamente.');
-  }
+    const msgEl = addMsg('ai', reply);
+    if (selectedPaciente) addSaveBar(msgEl, text, reply);
+  } catch { typing.remove(); addMsg('ai', 'Erro de conexão. Tente novamente.'); }
   isLoading = false;
-  sendBtn.disabled = false;
-  inputEl.focus();
+  document.getElementById('send-btn').disabled = false;
 }
 
-function addMessage(role, text) {
-  const msg = document.createElement('div');
-  msg.className = `msg ${role}`;
-  const avatar = document.createElement('div');
-  avatar.className = `avatar ${role === 'ai' ? 'ai' : 'user-av'}`;
-  avatar.textContent = role === 'ai' ? '🌿' : 'EU';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.innerHTML = formatResponse(text);
-  msg.appendChild(avatar);
-  msg.appendChild(bubble);
-  messagesEl.appendChild(msg);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return msg;
+function addSaveBar(msgEl, sintoma, resposta) {
+  const bar = document.createElement('div');
+  bar.className = 'save-bar';
+  bar.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="saveConsulta('${sintoma.replace(/'/g,"\\'")}','${resposta.replace(/'/g,"\\'")}',this)">💾 Salvar no histórico</button>`;
+  msgEl.querySelector('.bubble').appendChild(bar);
 }
 
+async function saveConsulta(sintoma, resposta, btn) {
+  const { error } = await sb.from('consultas').insert({ consultora_id: currentUser.id, paciente_id: selectedPaciente, sintoma, resposta_ia: resposta });
+  if (error) showToast('Erro ao salvar', true);
+  else { showToast('Consulta salva no histórico!'); btn.closest('.save-bar').remove(); }
+}
+
+function addMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = `msg ${role}`;
+  el.innerHTML = `<div class="avatar ${role === 'ai' ? 'ai' : 'user-av'}">${role === 'ai' ? '🌿' : 'EU'}</div><div class="bubble">${formatResponse(text)}</div>`;
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = 999999;
+  return el;
+}
 function addTyping() {
   const el = document.createElement('div');
   el.className = 'typing';
   el.innerHTML = `<div class="avatar ai">🌿</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-  messagesEl.appendChild(el);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = 999999;
   return el;
 }
+
+// ── PACIENTES ──
+async function loadPacientes() {
+  const { data } = await sb.from('pacientes').select('*').eq('consultora_id', currentUser.id).order('nome');
+  pacientes = data || [];
+  const sel = document.getElementById('patient-select');
+  sel.innerHTML = '<option value="">— Selecionar paciente —</option>';
+  pacientes.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome; sel.appendChild(o); });
+  const vs = document.getElementById('v-paciente');
+  if (vs) { vs.innerHTML = '<option value="">— Sem vínculo —</option>'; pacientes.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome; vs.appendChild(o); }); }
+}
+
+function renderPacientes() {
+  const q = (document.getElementById('search-pacientes').value || '').toLowerCase();
+  const list = document.getElementById('pacientes-list');
+  const filtered = pacientes.filter(p => p.nome.toLowerCase().includes(q));
+  if (!filtered.length) { list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>${pacientes.length ? 'Nenhum resultado' : 'Nenhum paciente cadastrado ainda'}</p></div><div style="text-align:center;margin-top:12px;"><button class="btn btn-primary" onclick="openModal('patient-modal')">+ Cadastrar primeiro paciente</button></div>`; return; }
+  list.innerHTML = filtered.map(p => {
+    const idade = p.data_nascimento ? Math.floor((Date.now() - new Date(p.data_nascimento)) / 31557600000) + ' anos' : (p.idade ? p.idade + ' anos' : '');
+    const infos = [p.sexo, idade, p.condicoes_saude].filter(Boolean).join(' · ');
+    const tel = p.telefone ? p.telefone.replace(/\D/g,'') : '';
+    return `<div class="patient-card">
+      <div class="patient-card-top">
+        <div>
+          <div class="patient-name">${p.nome}</div>
+          <div class="patient-info">${infos || 'Sem informações adicionais'}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-sm" onclick="editPaciente('${p.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePaciente('${p.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="patient-actions">
+        ${tel ? `<a class="whatsapp-btn" href="https://wa.me/55${tel}" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</a>` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="verHistorico('${p.id}','${p.nome}')">📋 Histórico</button>
+        <button class="btn btn-primary btn-sm" onclick="consultarPaciente('${p.id}')">🌿 Consultar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function consultarPaciente(id) {
+  document.getElementById('patient-select').value = id;
+  onPatientSelect();
+  showPage('chat');
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'venda-modal') { document.getElementById('v-data').value = new Date().toISOString().slice(0,10); loadProdutosModal(); }
+  if (id === 'patient-modal') { document.getElementById('patient-modal-title').textContent = 'Novo Paciente'; document.getElementById('edit-paciente-id').value = ''; clearPacienteForm(); }
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+function clearPacienteForm() {
+  ['p-nome','p-telefone','p-condicoes','p-medicamentos','p-alergias','p-obs'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('p-sexo').value = '';
+  document.getElementById('p-nascimento').value = '';
+}
+
+function editPaciente(id) {
+  const p = pacientes.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('edit-paciente-id').value = p.id;
+  document.getElementById('patient-modal-title').textContent = 'Editar Paciente';
+  document.getElementById('p-nome').value = p.nome || '';
+  document.getElementById('p-telefone').value = p.telefone || '';
+  document.getElementById('p-sexo').value = p.sexo || '';
+  document.getElementById('p-nascimento').value = p.data_nascimento || '';
+  document.getElementById('p-condicoes').value = p.condicoes_saude || '';
+  document.getElementById('p-medicamentos').value = p.medicamentos || '';
+  document.getElementById('p-alergias').value = p.alergias || '';
+  document.getElementById('p-obs').value = p.observacoes || '';
+  openModal('patient-modal');
+}
+
+async function savePaciente() {
+  const nome = document.getElementById('p-nome').value.trim();
+  if (!nome) return showToast('Nome é obrigatório', true);
+  const nascimento = document.getElementById('p-nascimento').value;
+  const idade = nascimento ? Math.floor((Date.now() - new Date(nascimento)) / 31557600000) : null;
+  const payload = { consultora_id: currentUser.id, nome, telefone: document.getElementById('p-telefone').value.trim(), sexo: document.getElementById('p-sexo').value || null, data_nascimento: nascimento || null, idade, condicoes_saude: document.getElementById('p-condicoes').value.trim(), medicamentos: document.getElementById('p-medicamentos').value.trim(), alergias: document.getElementById('p-alergias').value.trim(), observacoes: document.getElementById('p-obs').value.trim() };
+  const editId = document.getElementById('edit-paciente-id').value;
+  const { error } = editId ? await sb.from('pacientes').update(payload).eq('id', editId) : await sb.from('pacientes').insert(payload);
+  if (error) showToast('Erro ao salvar', true);
+  else { showToast(editId ? 'Paciente atualizado!' : 'Paciente cadastrado!'); closeModal('patient-modal'); await loadPacientes(); renderPacientes(); }
+}
+
+async function deletePaciente(id) {
+  if (!confirm('Remover este paciente? O histórico também será apagado.')) return;
+  const { error } = await sb.from('pacientes').delete().eq('id', id);
+  if (error) showToast('Erro ao remover', true);
+  else { showToast('Paciente removido'); await loadPacientes(); renderPacientes(); }
+}
+
+async function verHistorico(pacienteId, nome) {
+  document.getElementById('historico-modal-title').textContent = `Histórico — ${nome}`;
+  const content = document.getElementById('historico-content');
+  content.innerHTML = '<p style="color:var(--text-light);font-size:13px;">Carregando...</p>';
+  openModal('historico-modal');
+  const { data: consultas } = await sb.from('consultas').select('*').eq('paciente_id', pacienteId).order('criado_em', { ascending: false });
+  const { data: vendasP } = await sb.from('vendas').select('*').eq('paciente_id', pacienteId).order('data_venda', { ascending: false });
+  let html = '';
+  if (consultas?.length) {
+    html += `<div style="font-size:13px;font-weight:500;color:var(--text-mid);margin-bottom:8px;">Consultas (${consultas.length})</div>`;
+    html += consultas.map(c => `<div style="background:var(--green-pale);border-radius:8px;padding:10px 12px;margin-bottom:8px;"><div style="font-size:12px;color:var(--text-light)">${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div><div style="font-size:13px;font-weight:500;margin:3px 0">${c.sintoma}</div><div style="font-size:12px;color:var(--text-mid)">${(c.resposta_ia||'').slice(0,120)}...</div></div>`).join('');
+  }
+  if (vendasP?.length) {
+    html += `<div style="font-size:13px;font-weight:500;color:var(--text-mid);margin:12px 0 8px;">Compras (${vendasP.length})</div>`;
+    html += vendasP.map(v => `<div style="background:var(--amber-pale);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:500">${v.nome_produto || '—'}</div><div style="font-size:12px;color:var(--text-light)">${new Date(v.data_venda+'T12:00:00').toLocaleDateString('pt-BR')} · ${v.quantidade}x</div></div><div style="font-size:14px;font-weight:600;color:var(--green-deep)">R$ ${Number(v.preco_venda).toFixed(2)}</div></div>`).join('');
+  }
+  if (!html) html = '<div class="empty-state" style="padding:24px 0;"><p>Nenhum histórico ainda</p></div>';
+  content.innerHTML = html;
+}
+
+// ── FINANCEIRO ──
+async function loadProdutos() {
+  const { data } = await sb.from('produtos').select('*').eq('consultora_id', currentUser.id).eq('ativo', true).order('nome');
+  produtos = data || [];
+}
+
+function loadProdutosModal() {
+  const sel = document.getElementById('v-produto');
+  sel.innerHTML = '<option value="">Selecionar produto</option>';
+  produtos.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = `${p.nome} — R$ ${Number(p.preco_venda).toFixed(2)}`; o.dataset.custo = p.preco_custo; o.dataset.venda = p.preco_venda; sel.appendChild(o); });
+}
+
+function onProdutoSelect() {
+  const sel = document.getElementById('v-produto');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt.dataset.venda) { document.getElementById('v-preco').value = opt.dataset.venda; calcLucroVenda(); }
+}
+
+function calcLucroVenda() {
+  const sel = document.getElementById('v-produto');
+  const opt = sel.options[sel.selectedIndex];
+  const custo = parseFloat(opt?.dataset?.custo || 0);
+  const preco = parseFloat(document.getElementById('v-preco').value || 0);
+  const qtd = parseInt(document.getElementById('v-qtd').value || 1);
+  const preview = document.getElementById('lucro-preview');
+  if (preco > 0 && custo > 0) {
+    const lucro = (preco - custo) * qtd;
+    const total = preco * qtd;
+    preview.style.display = 'block';
+    preview.textContent = `Total: R$ ${total.toFixed(2)} · Lucro estimado: R$ ${lucro.toFixed(2)} (${Math.round(lucro/total*100)}%)`;
+  } else preview.style.display = 'none';
+}
+
+async function saveProduto() {
+  const nome = document.getElementById('prod-nome').value.trim();
+  if (!nome) return showToast('Nome obrigatório', true);
+  const { error } = await sb.from('produtos').insert({ consultora_id: currentUser.id, nome, preco_custo: parseFloat(document.getElementById('prod-custo').value||0), preco_venda: parseFloat(document.getElementById('prod-venda').value||0), estoque: parseInt(document.getElementById('prod-estoque').value||0) });
+  if (error) showToast('Erro ao salvar', true);
+  else { showToast('Produto cadastrado!'); closeModal('produto-modal'); ['prod-nome','prod-custo','prod-venda','prod-estoque'].forEach(id => document.getElementById(id).value = ''); await loadProdutos(); }
+}
+
+async function saveVenda() {
+  const prodId = document.getElementById('v-produto').value;
+  if (!prodId) return showToast('Selecione um produto', true);
+  const sel = document.getElementById('v-produto');
+  const opt = sel.options[sel.selectedIndex];
+  const custo = parseFloat(opt.dataset.custo || 0);
+  const preco = parseFloat(document.getElementById('v-preco').value || 0);
+  const qtd = parseInt(document.getElementById('v-qtd').value || 1);
+  const prod = produtos.find(p => p.id === prodId);
+  const { error } = await sb.from('vendas').insert({ consultora_id: currentUser.id, paciente_id: document.getElementById('v-paciente').value || null, produto_id: prodId, nome_produto: prod?.nome || '', quantidade: qtd, preco_venda: preco, preco_custo: custo, data_venda: document.getElementById('v-data').value });
+  if (error) showToast('Erro ao registrar', true);
+  else { showToast('Venda registrada!'); closeModal('venda-modal'); await loadVendas(); renderFinanceiro(); }
+}
+
+async function loadVendas() {
+  const { data } = await sb.from('vendas').select('*').eq('consultora_id', currentUser.id).order('data_venda', { ascending: false });
+  vendas = data || [];
+}
+
+function buildMonthFilter() {
+  const filter = document.getElementById('month-filter');
+  const months = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(); d.setMonth(d.getMonth() - i);
+    months.push(d.toISOString().slice(0,7));
+  }
+  filter.innerHTML = months.map(m => {
+    const [y,mo] = m.split('-');
+    const label = new Date(y, mo-1).toLocaleDateString('pt-BR', {month:'short', year:'2-digit'});
+    return `<button class="month-btn ${m === selectedMonth ? 'active' : ''}" onclick="selectMonth('${m}',this)">${label}</button>`;
+  }).join('');
+}
+
+function selectMonth(m, btn) {
+  selectedMonth = m;
+  document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFinanceiro();
+}
+
+function renderFinanceiro() {
+  const filtered = vendas.filter(v => v.data_venda && v.data_venda.startsWith(selectedMonth));
+  const totalVendido = filtered.reduce((s, v) => s + (v.preco_venda * v.quantidade), 0);
+  const totalLucro = filtered.reduce((s, v) => s + (v.lucro * v.quantidade), 0);
+  const totalVendas = filtered.length;
+  const ticketMedio = totalVendas ? totalVendido / totalVendas : 0;
+  document.getElementById('fin-summary').innerHTML = `
+    <div class="fin-card"><div class="fin-label">Total vendido</div><div class="fin-value">R$ ${totalVendido.toFixed(2)}</div><div class="fin-sub">${totalVendas} venda(s)</div></div>
+    <div class="fin-card"><div class="fin-label">Lucro do período</div><div class="fin-value amber">R$ ${totalLucro.toFixed(2)}</div><div class="fin-sub">Margem: ${totalVendido ? Math.round(totalLucro/totalVendido*100) : 0}%</div></div>
+    <div class="fin-card"><div class="fin-label">Ticket médio</div><div class="fin-value" style="font-size:18px">R$ ${ticketMedio.toFixed(2)}</div></div>
+    <div class="fin-card"><div class="fin-label">Pacientes atendidos</div><div class="fin-value" style="font-size:18px">${new Set(filtered.map(v=>v.paciente_id).filter(Boolean)).size}</div></div>`;
+  const list = document.getElementById('vendas-list');
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state" style="padding:32px 0;"><p>Nenhuma venda neste período</p></div>'; return; }
+  list.innerHTML = filtered.map(v => {
+    const pac = pacientes.find(p => p.id === v.paciente_id);
+    return `<div class="venda-row">
+      <div class="venda-info">
+        <div class="venda-produto">${v.nome_produto || '—'} ${v.quantidade > 1 ? `(${v.quantidade}x)` : ''}</div>
+        <div class="venda-detalhe">${new Date(v.data_venda+'T12:00:00').toLocaleDateString('pt-BR')}${pac ? ' · ' + pac.nome : ''}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="venda-lucro">R$ ${(v.preco_venda * v.quantidade).toFixed(2)}</div>
+        <div style="font-size:11px;color:var(--text-light)">lucro R$ ${(v.lucro * v.quantidade).toFixed(2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadContaStats() {
+  const [{ count: cp }, { count: cc }, { count: cv }] = await Promise.all([
+    sb.from('pacientes').select('*', { count:'exact', head:true }).eq('consultora_id', currentUser.id),
+    sb.from('consultas').select('*', { count:'exact', head:true }).eq('consultora_id', currentUser.id),
+    sb.from('vendas').select('*', { count:'exact', head:true }).eq('consultora_id', currentUser.id)
+  ]);
+  document.getElementById('conta-total-pacientes').textContent = cp || 0;
+  document.getElementById('conta-total-consultas').textContent = cc || 0;
+  document.getElementById('conta-total-vendas').textContent = cv || 0;
+}
+
+// ── UTILS ──
+function showToast(msg, isError = false) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+init();
 </script>
 </body>
 </html>

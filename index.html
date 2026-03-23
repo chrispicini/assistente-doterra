@@ -513,7 +513,194 @@ Antiglicemiantes: Cassia, Orégano.
 Sedativos: Lavanda, Ylang Ylang, Sálvia Esclareia.
 Grapefruit: interage com dezenas de medicamentos (estatinas, anticoagulantes etc).`;
 
-// ── AUTH ──
+// ── BASE DE CONHECIMENTO LOCAL ──
+const BASE_OLEOS = [
+  { nomes: ['lavanda','lavender','ansiedade','insônia','sono','relaxar','relaxamento','estresse','stress','queimadura','alergia','coceira','irritação','dor de cabeça tensional','tensão','tpm','cólica leve','bebê','criança pequena'],
+    oleo: 'Lavanda (Lavandula angustifolia)',
+    usos: 'Ansiedade, insônia, relaxamento, queimaduras leves, alergias, irritação da pele, dor de cabeça tensional, TPM, cólicas leves. O óleo mais versátil e seguro da doTERRA.',
+    como_usar: '• Difusão: 4–6 gotas no difusor\n• Tópico: pode usar puro em pequenas áreas ou diluído 2–5% em adultos\n• Travesseiro: 1–2 gotas na fronha\n• Banho: 5 gotas na água',
+    diluicao: 'Adultos: 2–5% | Crianças >2 anos: 0,5–1% | Bebês >3 meses: só difusão',
+    blends: 'Bergamota (ansiedade), Frankincense (meditação/pele), Cedro (sono profundo), Roman Chamomile (crianças)',
+    cuidados: 'Muito seguro. Cuidado em bebês <3 meses. Pode potencializar sedativos.' },
+
+  { nomes: ['dor de cabeça','enxaqueca','cefaleia','náusea','enjoo','fadiga','cansaço','congestão','foco','concentração','energia','disposição','febre','dor muscular leve'],
+    oleo: 'Hortelã-Pimenta (Mentha piperita)',
+    usos: 'Dor de cabeça, náusea, fadiga mental, congestão nasal, dores musculares, febre leve, foco e concentração.',
+    como_usar: '• Têmporas e nuca: 1 gota diluída para dor de cabeça\n• Peito: diluído para congestão\n• Difusão: 3–4 gotas para foco\n• Interno: 1 gota em água gelada',
+    diluicao: 'Adultos: 1–2% | Crianças 6–12 anos: 0,5% | NÃO usar em menores de 6 anos',
+    blends: 'Lavanda (dor de cabeça), Wild Orange (energia), Eucalipto (respiração)',
+    cuidados: '⚠️ NÃO usar em crianças <6 anos. NÃO aplicar próximo ao rosto de bebês. Cuidado em gestantes. Não usar com homeopatia.' },
+
+  { nomes: ['inflamação','articulação','artrite','imunidade','imune','proteção celular','pele matura','cicatriz','meditação','espiritualidade','envelhecimento','antienvelhecimento','ansiedade profunda'],
+    oleo: 'Frankincense / Olíbano (Boswellia spp.)',
+    usos: 'Anti-inflamatório, imunidade, ansiedade, meditação, pele envelhecida, cicatrizes, articulações, suporte celular.',
+    como_usar: '• Tópico: 2–3 gotas diluídas em carreador\n• Difusão: 4–5 gotas\n• Sublingual: 1 gota (somente doTERRA CPTG)\n• Face: misturar no hidratante',
+    diluicao: 'Adultos: 2–3% | Seguro para a maioria dos perfis',
+    blends: 'Lavanda (pele/ansiedade), Mirra (imunidade), Wild Orange (humor), Copaíba (anti-inflamatório)',
+    cuidados: 'Muito seguro. Evitar uso interno na gestação. Pode potencializar anticoagulantes.' },
+
+  { nomes: ['tosse','bronquite','sinusite','gripe','resfriado','respiração','respiratório','vias aéreas','pulmão'],
+    oleo: 'Eucalipto (Eucalyptus radiata)',
+    usos: 'Congestão nasal, sinusite, bronquite, tosse, gripe, suporte respiratório.',
+    como_usar: '• Difusão: 4–5 gotas\n• Peito e costas: diluído em carreador\n• Vapor: 3 gotas em bacia com água quente, inalar por 5 min\n• Inalação direta: 1 gota nas palmas',
+    diluicao: 'Adultos: 2–3% | Crianças 6–10 anos: 1% | NÃO usar em menores de 6 anos',
+    blends: 'Hortelã (respiração potente), Tea Tree (infecções), Lavanda (tosse noturna), Breathe blend',
+    cuidados: '⚠️ NÃO usar em crianças <6 anos. Cuidado em asmáticos. Evitar na gestação.' },
+
+  { nomes: ['fungo','micose','acne','bactéria','candidíase','ferida','infecção','caspa','unha','limpeza'],
+    oleo: 'Tea Tree / Melaleuca (Melaleuca alternifolia)',
+    usos: 'Antifúngico, antibacteriano, acne, candidíase, micose, feridas, caspa, unhas infectadas.',
+    como_usar: '• Puro em pontos (acne, micose, ferida pequena)\n• Diluído: 1–2% para áreas maiores\n• Difusão: purificação do ar\n• Nunca ingerir',
+    diluicao: 'Pode usar puro em pequenas áreas (adultos). 1–2% para áreas maiores.',
+    blends: 'Lavanda (pele/acne), Limão (limpeza), Orégano (infecções fúngicas), On Guard',
+    cuidados: '⚠️ NÃO ingerir. Pode irritar mucosas. Cuidado em crianças pequenas.' },
+
+  { nomes: ['depressão','humor','tristeza','motivação','criatividade','imunidade','detox','limpeza interna','digestão leve','garganta'],
+    oleo: 'Limão (Citrus limon)',
+    usos: 'Energia, humor, imunidade, detox, digestão, garganta irritada, limpeza.',
+    como_usar: '• Água: 1–2 gotas (copo de vidro ou inox)\n• Difusão: 4–5 gotas\n• Tópico: diluído 1–2%',
+    diluicao: 'Adultos: 1–2%',
+    blends: 'Hortelã (energia+foco), Gengibre (digestão+imunidade)',
+    cuidados: '⚠️ FOTOSSENSÍVEL — não aplicar na pele antes de exposição solar (12h). Cuidado em gastrite (uso interno).' },
+
+  { nomes: ['tpm','menopausa','hormônio','hormonal','cólica menstrual','ciclo menstrual','ovário','útero','equilíbrio feminino'],
+    oleo: 'Sálvia Esclareia (Clary Sage / Salvia sclarea)',
+    usos: 'TPM, cólica menstrual, menopausa, equilíbrio hormonal, ansiedade hormonal, insônia hormonal.',
+    como_usar: '• Abdômen: massagem com 2–3 gotas diluídas\n• Difusão: 4 gotas\n• Pulso: 1 gota diluída',
+    diluicao: 'Adultos: 2–3%',
+    blends: 'Gerânio (hormônios), Lavanda (ansiedade), Funcho (ciclo)',
+    cuidados: '⚠️ NÃO usar no 1º e 2º trimestre de gestação. Pode estimular o útero. NÃO combinar com álcool.' },
+
+  { nomes: ['varizes','retenção de líquido','inchaço','edema','celulite','circulação','drenagem','linfático'],
+    oleo: 'Cipreste (Cupressus sempervirens)',
+    usos: 'Varizes, retenção de líquidos, celulite, edema, circulação, drenagem linfática.',
+    como_usar: '• Massagem nas pernas: de baixo para cima, 2–3 gotas diluídas\n• Difusão: 3–4 gotas',
+    diluicao: 'Adultos: 2–3%',
+    blends: 'Lemongrass (drenagem), Gengibre (circulação), Lavanda (relaxamento)',
+    cuidados: '⚠️ NÃO usar em gestantes. Cuidado em hipertensos.' },
+
+  { nomes: ['tdah','hiperatividade','déficit de atenção','insônia severa','queda de cabelo','cabelo','couro cabeludo'],
+    oleo: 'Cedro (Cedarwood / Juniperus virginiana)',
+    usos: 'Insônia, TDAH, hiperatividade, ansiedade, queda de cabelo, acne.',
+    como_usar: '• Difusão noturna: 4–5 gotas\n• Sola do pé: 1–2 gotas diluídas antes de dormir\n• Couro cabeludo: misturar no shampoo (3 gotas/uso)',
+    diluicao: 'Adultos: 2–3%',
+    blends: 'Lavanda (sono profundo), Vetiver (TDAH), Frankincense (meditação)',
+    cuidados: 'Evitar uso interno. Cuidado na gestação.' },
+
+  { nomes: ['libido','desejo sexual','pressão alta','hipertensão','equilíbrio emocional','romance','sensualidade'],
+    oleo: 'Ylang Ylang (Cananga odorata)',
+    usos: 'Libido, equilíbrio hormonal, pressão arterial elevada, TPM, equilíbrio emocional.',
+    como_usar: '• Difusão: 1–2 gotas (muito intenso)\n• Pulso e pescoço: 1 gota muito diluída\n• Banho: 2 gotas',
+    diluicao: 'Adultos: 0,5–1% — MUITO potente',
+    blends: 'Bergamota (romance), Lavanda (relaxamento profundo), Sândalo (sensualidade)',
+    cuidados: '⚠️ NÃO exagerar — excesso causa dor de cabeça e náusea. Cuidado em hipotensão. Moderação na gestação.' },
+
+  { nomes: ['dor crônica','inflamação crônica','neuropatia','sistema nervoso','dor nas costas','artrite','reumatismo'],
+    oleo: 'Copaíba (Copaifera spp.)',
+    usos: 'Anti-inflamatório potente, dores crônicas, artrite, neuropatia, ansiedade, pele irritada.',
+    como_usar: '• Tópico: 2–3 gotas diluídas na área\n• Sublingual: 1–2 gotas\n• Difusão: 4 gotas',
+    diluicao: 'Adultos: 2–3%',
+    blends: 'Frankincense (sinergia anti-inflamatória), Deep Blue (dores), Lavanda (nervoso)',
+    cuidados: 'Muito seguro. Cuidado com anti-inflamatórios e anticoagulantes.' },
+
+  { nomes: ['indigestão','gases','barriga','intestino','estômago','digestão','cólica digestiva','azia','refluxo'],
+    oleo: 'DigestZen (blend doTERRA)',
+    usos: 'Indigestão, gases, distensão abdominal, náusea, azia, síndrome do intestino irritável, cólica digestiva.',
+    como_usar: '• Abdômen: massagem circular com 2 gotas diluídas\n• Interno: 1–2 gotas em água ou cápsula\n• Difusão: 3 gotas',
+    diluicao: 'Tópico: 2%',
+    blends: 'Gengibre (náusea extra), Cardamomo (estômago)',
+    cuidados: '⚠️ NÃO usar em gestantes. Crianças >6 anos com supervisão.' },
+
+  { nomes: ['imunidade','proteção','gripe','vírus','prevenção','doença','sistema imune','on guard'],
+    oleo: 'On Guard (blend doTERRA)',
+    usos: 'Imunidade preventiva, proteção contra vírus e bactérias, infecções respiratórias, ambiente com muita gente.',
+    como_usar: '• Difusão: 4–5 gotas\n• Sola do pé: 2 gotas diluídas\n• Gargarejo: 1 gota em água morna\n• Limpeza de superfícies',
+    diluicao: 'Tópico: 2–3%',
+    blends: 'Limão (proteção extra), Frankincense (celular)',
+    cuidados: '⚠️ NÃO usar em gestantes. NÃO usar em crianças <6 anos por via tópica. Cuidado com anticoagulantes.' },
+
+  { nomes: ['dor muscular','músculo','tensão muscular','lesão','esporte','treino','academia','costas','lombar','cervical','articulação','deep blue'],
+    oleo: 'Deep Blue (blend doTERRA)',
+    usos: 'Dores musculares, tensão, lesões esportivas, artrite, dores nas costas, cervical, lombar.',
+    como_usar: '• Área afetada: massagem com 2–3 gotas diluídas\n• Combinar com Fracionado de Coco para massagem mais longa',
+    diluicao: 'Tópico: 2–3% — SEMPRE diluído',
+    blends: 'Copaíba (anti-inflamatório sinérgico), Frankincense (articulações)',
+    cuidados: '⚠️ NÃO usar em gestantes. NÃO usar em crianças <6 anos. NÃO ingerir. Cuidado com anticoagulantes.' },
+
+  { nomes: ['respiração','asma','ronco','apneia','alergia respiratória','breathe','bronquite','vias aéreas'],
+    oleo: 'Breathe (blend doTERRA)',
+    usos: 'Congestão, asma (suporte), bronquite, sinusite, ronco, alergias respiratórias.',
+    como_usar: '• Difusão: 4–5 gotas\n• Peito e costas: 2 gotas diluídas\n• Inalação: 1 gota nas palmas, respirar fundo',
+    diluicao: 'Tópico: 2%',
+    blends: 'Eucalipto (congestão extra), On Guard (infecções)',
+    cuidados: 'NÃO aplicar próximo ao rosto de crianças <3 anos. Cuidado em asma grave. Moderação na gestação.' },
+
+  { nomes: ['náusea','enjoo','viagem','gestante náusea','gravidez náusea','vômito','mal estar'],
+    oleo: 'Gengibre (Zingiber officinale)',
+    usos: 'Náusea (inclusive na gestação em difusão), enjoo de viagem, digestão lenta, gases, circulação.',
+    como_usar: '• Difusão: 3–4 gotas (seguro na gestação)\n• Abdômen: 1–2 gotas diluídas\n• Chá: 1 gota em chá quente',
+    diluicao: 'Adultos: 1–2%',
+    blends: 'Limão (imunidade+digestão), Hortelã (náusea), DigestZen',
+    cuidados: 'Pode irritar pele sensível. Cuidado com anticoagulantes. Uso interno com moderação na gestação — difusão é mais segura.' },
+
+  { nomes: ['pele','rugas','manchas','acne','oleosidade','cicatriz','envelhecimento','pele seca','pele matura','dermatite','eczema'],
+    oleo: 'Frankincense + Tea Tree + Lavanda (combinação para pele)',
+    usos: 'Pele envelhecida, manchas, acne, oleosidade, cicatrizes, dermatite, eczema.',
+    como_usar: '• Face: 1 gota de cada diluída em hidratante\n• Cicatriz: Frankincense puro em pequena área\n• Acne: Tea Tree puro no ponto',
+    diluicao: '0,5–1% para face',
+    blends: 'Helichrysum (cicatrizes), Gerânio (equilíbrio), Rosa (antienvelhecimento)',
+    cuidados: 'Sempre patch test antes. Fotossensíveis não usar antes do sol.' },
+
+  { nomes: ['criança','bebê','infantil','pediatria','cólica bebê','dentição','choro','agitação infantil'],
+    oleo: 'Roman Chamomile + Lavanda (para crianças)',
+    usos: 'Cólica, choro excessivo, dentição, insônia infantil, irritabilidade, ansiedade em crianças.',
+    como_usar: '• Sola do pé: 1 gota muito diluída\n• Difusão: 2–3 gotas no quarto\n• Massagem abdominal (cólica): 1 gota em 10ml de carreador',
+    diluicao: 'Crianças 1–5 anos: 0,5–1% | Bebês 3–12m: 0,2%',
+    blends: 'Cedro (sono), Vetiver (TDAH/agitação)',
+    cuidados: 'NÃO usar Hortelã-pimenta nem Eucalipto em crianças <6 anos. Sempre diluir muito.' },
+
+  { nomes: ['gestante','gestação','grávida','gravidez','trimestre'],
+    oleo: 'Óleos seguros para gestantes',
+    usos: 'Durante a gestação é necessário cuidado redobrado. Apenas alguns óleos são considerados seguros.',
+    como_usar: '• 1º trimestre: APENAS difusão de Lavanda e Gengibre\n• 2º trimestre: Lavanda tópica diluída (1%), Frankincense difusão, Gengibre\n• 3º trimestre: Lavanda, Frankincense, Gerânio (moderação), Neroli',
+    diluicao: 'Sempre 1% ou menos para uso tópico na gestação',
+    blends: 'Lavanda + Gengibre (náusea segura)',
+    cuidados: '⚠️ NUNCA em qualquer trimestre: Orégano, Manjericão, Funcho, Mirra, Sálvia Esclareia, Cipreste, Alecrim, Cassia, Cravo, On Guard tópico, Wintergreen. Sempre consultar médico.' },
+
+  { nomes: ['idoso','terceira idade','idosa','mais velha','60','70','80'],
+    oleo: 'Cuidados especiais para idosos',
+    usos: 'Idosos respondem bem aos óleos mas precisam de doses menores e atenção às interações medicamentosas.',
+    como_usar: '• Usar sempre metade da dose recomendada para adultos\n• Preferir difusão quando possível\n• Massagem suave com óleos diluídos',
+    diluicao: 'Sempre 50% da dose adulto (ex: se adulto usa 2%, idoso usa 1%)',
+    blends: 'Lavanda (sono/ansiedade), Frankincense (articulações/imunidade), Deep Blue (dores)',
+    cuidados: '⚠️ Cuidado especial com anticoagulantes (Wintergreen, Orégano, Cravo, Frankincense). Monitorar pressão (Ylang Ylang, Gerânio). Consultar médico sobre interações.' },
+];
+
+function buscarOleos(texto) {
+  const t = texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const resultados = [];
+  for (const oleo of BASE_OLEOS) {
+    const score = oleo.nomes.filter(n => t.includes(n.normalize('NFD').replace(/[\u0300-\u036f]/g,''))).length;
+    if (score > 0) resultados.push({ ...oleo, score });
+  }
+  resultados.sort((a,b) => b.score - a.score);
+  if (!resultados.length) {
+    return `🌿 **Não encontrei um óleo específico para essa situação.**\n\nTente descrever:\n- O sintoma principal (ex: dor de cabeça, ansiedade, tosse)\n- O perfil do cliente (idade, sexo, gestante?)\n- A intensidade ou duração do problema\n\nOu selecione um dos atalhos rápidos abaixo para os casos mais comuns.`;
+  }
+  const r = resultados[0];
+  let resp = `🌿 **${r.oleo}**\n\n`;
+  resp += `**Para que serve:**\n${r.usos}\n\n`;
+  resp += `**Como usar:**\n${r.como_usar}\n\n`;
+  resp += `**Diluição:**\n${r.diluicao}\n\n`;
+  resp += `**Combina bem com:**\n${r.blends}\n\n`;
+  resp += `**Cuidados:**\n${r.cuidados}`;
+  if (resultados.length > 1) {
+    resp += `\n\n---\n💡 **Outros óleos que podem ajudar:** ${resultados.slice(1,3).map(x => x.oleo.split('(')[0].trim()).join(', ')}`;
+  }
+  return resp;
+}
+
+
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) await onLogin(session.user);
@@ -690,41 +877,25 @@ function formatResponse(text) {
     .split('\n\n').map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('');
 }
 
-async function sendMessage() {
+function sendMessage() {
   const text = document.getElementById('chat-input').value.trim();
   if (!text || isLoading) return;
-  const profileCtx = buildProfileContext();
-  const msgWithCtx = profileCtx ? text + profileCtx : text;
   addMsg('user', text);
   document.getElementById('chat-input').value = '';
   document.getElementById('chat-input').style.height = 'auto';
-  conversationHistory.push({ role: 'user', content: msgWithCtx });
+  conversationHistory.push({ role: 'user', content: text });
   const typing = addTyping();
   isLoading = true;
   document.getElementById('send-btn').disabled = true;
-  try {
-    const geminiMessages = conversationHistory.map(m => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }]
-    }));
-    const res = await fetch('/.netlify/functions/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: geminiMessages
-      })
-    });
-    const data = await res.json();
-    console.log('Gemini response:', JSON.stringify(data).slice(0, 300));
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Desculpe, não consegui processar.';
+  setTimeout(() => {
+    const reply = buscarOleos(text + ' ' + buildProfileContext());
     typing.remove();
     conversationHistory.push({ role: 'assistant', content: reply });
     const msgEl = addMsg('ai', reply);
     if (selectedPaciente) addSaveBar(msgEl, text, reply);
-  } catch { typing.remove(); addMsg('ai', 'Erro de conexão. Tente novamente.'); }
-  isLoading = false;
-  document.getElementById('send-btn').disabled = false;
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+  }, 800);
 }
 
 function addSaveBar(msgEl, sintoma, resposta) {
